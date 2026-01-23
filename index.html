@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bizim Özel Yerimiz 💕</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>💕</h1>
+                <h2>Emir & Pelin</h2>
+                <p>Bizim özel yerimiz</p>
+            </div>
+            
+            <div class="login-form">
+                <div class="user-selection">
+                    <div class="user-option" onclick="selectUser('emir')">
+                        <div class="user-avatar-display">
+                            <div class="selected-avatar" id="emirAvatar"></div>
+                        </div>
+                        <span class="user-name">Emir Kağan</span>
+                        <input type="radio" name="selectedUser" value="emir" id="userEmir">
+                    </div>
+                    
+                    <div class="user-option" onclick="selectUser('pelin')">
+                        <div class="user-avatar-display">
+                            <div class="selected-avatar" id="pelinAvatar"></div>
+                        </div>
+                        <span class="user-name">Pelin</span>
+                        <input type="radio" name="selectedUser" value="pelin" id="userPelin">
+                    </div>
+                </div>
+                
+                <div class="password-section">
+                    <input type="password" id="passwordInput" placeholder="Şifre" maxlength="20">
+                    <button class="login-btn" onclick="attemptLogin()">Giriş Yap</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="main-app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 id="welcomeMessage">Hoş Geldin 💕</h1>
+                <div class="header-actions">
+                    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
+                    <button class="logout-btn" onclick="logout()">Çıkış</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="main-nav">
+            <div class="nav-container">
+                <button class="nav-btn active" onclick="showSection('home')" data-section="home">
+                    <span>🏠</span>
+                    <small>Ana Sayfa</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('music')" data-section="music">
+                    <span>🎵</span>
+                    <small>Müzikler</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('dreams')" data-section="dreams">
+                    <span>✨</span>
+                    <small>Hayaller</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('notes')" data-section="notes">
+                    <span>💌</span>
+                    <small>Notlar</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('profile')" data-section="profile">
+                    <span>⚙️</span>
+                    <small>Profil</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('surprise')" data-section="surprise">
+                    <span>🎁</span>
+                    <small>Sürpriz</small>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Content Sections -->
+        <main class="app-content">
+            <!-- Home Section -->
+            <section id="homeSection" class="content-section active">
+                <div class="welcome-card">
+                    <h2>Bizim Özel Alanımız</h2>
+                    <p>Burası sadece ikimizin paylaştığı özel bir yer. Müziklerimizi, hayallerimizi ve birbirimize yazdığımız notları burada saklıyoruz.</p>
+                    <div class="stats">
+                        <div class="stat">
+                            <span class="stat-number" id="musicCount">0</span>
+                            <span class="stat-label">Müzik</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="dreamCount">0</span>
+                            <span class="stat-label">Hayal</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number" id="noteCount">0</span>
+                            <span class="stat-label">Not</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Music Section -->
+            <section id="musicSection" class="content-section">
+                <div class="section-header">
+                    <h2>🎵 Müzik Listemiz</h2>
+                    <button class="add-btn" onclick="addMusic()">+ Ekle</button>
+                </div>
+                <div id="musicList" class="item-list">
+                    <!-- Müzikler buraya eklenecek -->
+                </div>
+            </section>
+
+            <!-- Dreams Section -->
+            <section id="dreamsSection" class="content-section">
+                <div class="section-header">
+                    <h2>✨ Hayallerimiz</h2>
+                    <button class="add-btn" onclick="addDream()">+ Ekle</button>
+                </div>
+                <div id="dreamsList" class="item-list">
+                    <!-- Hayaller buraya eklenecek -->
+                </div>
+            </section>
+
+            <!-- Notes Section -->
+            <section id="notesSection" class="content-section">
+                <div class="section-header">
+                    <h2>💌 Notlarımız</h2>
+                    <button class="add-btn" onclick="addNote()">+ Ekle</button>
+                </div>
+                <div id="notesList" class="item-list">
+                    <!-- Notlar buraya eklenecek -->
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profileSection" class="content-section">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="current-avatar" id="currentAvatar">👨</div>
+                        <h2 id="profileName">Emir Kağan</h2>
+                    </div>
+                    
+                    <div class="profile-settings">
+                        <div class="setting-group">
+                            <label>Avatar Seç</label>
+                            <div class="avatar-grid" id="profileAvatarGrid">
+                                <!-- Avatar seçenekleri buraya eklenecek -->
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label>Şifre Değiştir</label>
+                            <div class="password-change">
+                                <input type="password" id="currentPassword" placeholder="Mevcut şifre">
+                                <input type="password" id="newPassword" placeholder="Yeni şifre">
+                                <button class="save-btn" onclick="changePassword()">Şifreyi Değiştir</button>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label>İstatistikler</label>
+                            <div class="profile-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Toplam Müzik:</span>
+                                    <span class="stat-value" id="profileMusicCount">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Toplam Hayal:</span>
+                                    <span class="stat-value" id="profileDreamCount">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Toplam Not:</span>
+                                    <span class="stat-value" id="profileNoteCount">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group" id="pelinSpecialSection">
+                            <!-- Pelin'e özel bölüm buraya eklenecek -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Surprise Section -->
+            <section id="surpriseSection" class="content-section">
+                <div class="surprise-container">
+                    <div class="surprise-header">
+                        <h2>🎁 Pelin'e Özel Sürprizler</h2>
+                        <p>Bu bölüm kalbimideki minik hanımfendi için hazırlandı! ❤️</p>
+                    </div>
+                    
+                    <div class="surprise-content" id="surpriseContent">
+                        <!-- Sürpriz içeriği buraya eklenecek -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="addModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Yeni Ekle</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="itemInput" placeholder="Buraya yazın...">
+                <textarea id="itemDescription" placeholder="Açıklama (opsiyonel)"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeModal()">İptal</button>
+                <button class="save-btn" onclick="saveItem()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="editModalTitle">Düzenle</h3>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="editItemInput" placeholder="Buraya yazın...">
+                <textarea id="editItemDescription" placeholder="Açıklama (opsiyonel)"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeEditModal()">İptal</button>
+                <button class="save-btn" onclick="saveEditedItem()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    
+    <!-- Our Scripts -->
+    <script src="firebase-api.js"></script>
+    <script src="script.js"></script>
+    
+    <!-- Firebase'i başlat -->
+    <script>
+        // Firebase SDK yüklendikten sonra başlat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Biraz bekle ki diğer scriptler yüklensin
+            setTimeout(() => {
+                if (window.firebase) {
+                    initFirebase();
+                } else {
+                    console.error('Firebase SDK yüklenemedi');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
