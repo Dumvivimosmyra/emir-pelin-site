@@ -370,17 +370,93 @@ function loadMessages() {
         return;
     }
     
-    messagesArea.innerHTML = chatData.messages.map(msg => `
-        <div class="message ${msg.sender === currentUser ? 'my-message' : 'other-message'}">
-            <div class="message-content">
+    messagesArea.innerHTML = chatData.messages.map(msg => {
+        const reactions = msg.reactions || {};
+        const reactionHtml = Object.entries(reactions).map(([emoji, users]) =>
+            users.length > 0 ? `<span class="reaction-badge ${users.includes(currentUser) ? 'reacted' : ''}" onclick="toggleReaction(${msg.id}, '${emoji}')">${emoji} ${users.length}</span>` : ''
+        ).join('');
+
+        return `
+        <div class="message ${msg.sender === currentUser ? 'my-message' : 'other-message'}" id="msg-${msg.id}">
+            <div class="message-content" oncontextmenu="showReactionPicker(event, ${msg.id})" ontouchstart="handleMsgTouchStart(event, ${msg.id})" ontouchend="handleMsgTouchEnd()">
                 <p>${escapeHtml(msg.text)}</p>
                 <small class="message-time">${new Date(msg.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</small>
             </div>
+            ${reactionHtml ? `<div class="reaction-row">${reactionHtml}</div>` : ''}
         </div>
-    `).join('');
+    `}).join('');
     
-    // Scroll to bottom
     messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+// Emoji reaksiyon sistemi
+const REACTION_EMOJIS = [
+    '❤️','🧡','💛','💚','💙','💜','🖤','🤍','💕','💞',
+    '😂','😍','🥰','😘','😊','😎','🤩','😏','😢','😭',
+    '😮','😱','🤯','😡','🤬','🥺','😴','🤔','🙄','😅',
+    '👍','👎','👏','🙌','🤝','🫶','💪','🤞','✌️','🫠',
+    '🔥','✨','💫','⭐','🎉','🎊','🎁','🏆','💯','❗'
+];
+let touchTimer = null;
+
+function showReactionPicker(e, msgId) {
+    e.preventDefault();
+    openReactionPicker(msgId);
+}
+
+function handleMsgTouchStart(e, msgId) {
+    touchTimer = setTimeout(() => openReactionPicker(msgId), 500);
+}
+
+function handleMsgTouchEnd() {
+    clearTimeout(touchTimer);
+}
+
+function openReactionPicker(msgId) {
+    closeReactionPicker();
+    const msgEl = document.getElementById(`msg-${msgId}`);
+    if (!msgEl) return;
+
+    const picker = document.createElement('div');
+    picker.className = 'reaction-picker';
+    picker.id = 'reactionPicker';
+    picker.innerHTML = `
+        <div class="reaction-picker-grid">
+            ${REACTION_EMOJIS.map(e =>
+                `<button class="reaction-option" onclick="toggleReaction(${msgId}, '${e}'); closeReactionPicker();">${e}</button>`
+            ).join('')}
+        </div>
+    `;
+
+    msgEl.appendChild(picker);
+    setTimeout(() => document.addEventListener('click', closeReactionPicker, { once: true }), 100);
+}
+
+function closeReactionPicker() {
+    const p = document.getElementById('reactionPicker');
+    if (p) p.remove();
+}
+
+function toggleReaction(msgId, emoji) {
+    const msg = chatData.messages.find(m => m.id === msgId);
+    if (!msg) return;
+
+    if (!msg.reactions) msg.reactions = {};
+    if (!msg.reactions[emoji]) msg.reactions[emoji] = [];
+
+    const idx = msg.reactions[emoji].indexOf(currentUser);
+    if (idx === -1) {
+        msg.reactions[emoji].push(currentUser);
+    } else {
+        msg.reactions[emoji].splice(idx, 1);
+    }
+
+    // Firebase'e kaydet
+    localStorage.setItem('chatMessages', JSON.stringify(chatData.messages));
+    if (window.firebaseAPI) {
+        window.firebaseAPI.saveData('chatMessages', chatData.messages);
+    }
+    loadMessages();
 }
 
 // Enter tuşu ile mesaj gönderme - sadece bir kez tanımla
@@ -968,9 +1044,11 @@ function loadMemories() {
         return;
     }
     
-    grid.innerHTML = surpriseData.memories.map(memory => `
+    grid.innerHTML = surpriseData.memories.map((memory, index) => `
         <div class="memory-card">
-            ${memory.photo ? `<img src="${memory.photo}" alt="${memory.title}">` : '<div class="no-photo">📷</div>'}
+            ${memory.photo 
+                ? `<img src="${memory.photo}" alt="${memory.title}" class="memory-img" onclick="openGallery(${index})">`
+                : '<div class="no-photo">📷</div>'}
             <div class="memory-info">
                 <h3>${memory.title}</h3>
                 <p>${memory.description}</p>
@@ -982,6 +1060,83 @@ function loadMemories() {
             </div>
         </div>
     `).join('');
+}
+
+// Galeri sistemi
+let galleryIndex = 0;
+
+function openGallery(index) {
+    const photos = surpriseData.memories.filter(m => m.photo);
+    if (photos.length === 0) return;
+
+    // Tıklanan fotoğrafın photos array'indeki indexini bul
+    const clickedMemory = surpriseData.memories[index];
+    galleryIndex = photos.findIndex(m => m.id === clickedMemory.id);
+    if (galleryIndex === -1) galleryIndex = 0;
+
+    const old = document.getElementById('galleryOverlay');
+    if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'galleryOverlay';
+    overlay.className = 'gallery-overlay';
+    overlay.innerHTML = `
+        <button class="gallery-close" onclick="closeGallery()">✕</button>
+        <button class="gallery-nav gallery-prev" onclick="galleryNav(-1)">‹</button>
+        <div class="gallery-content">
+            <img id="galleryImg" src="${photos[galleryIndex].photo}" alt="">
+            <div class="gallery-caption">
+                <strong id="galleryTitle">${photos[galleryIndex].title}</strong>
+                <span id="galleryDesc">${photos[galleryIndex].description || ''}</span>
+                <small id="galleryMeta">${photos[galleryIndex].createdAtFormatted}</small>
+            </div>
+            <div class="gallery-dots" id="galleryDots"></div>
+        </div>
+        <button class="gallery-nav gallery-next" onclick="galleryNav(1)">›</button>
+    `;
+    document.body.appendChild(overlay);
+    updateGalleryDots(photos);
+
+    // Swipe desteği
+    let touchStartX = 0;
+    overlay.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+    overlay.addEventListener('touchend', e => {
+        const diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) galleryNav(diff > 0 ? 1 : -1);
+    });
+
+    // Klavye desteği
+    document.addEventListener('keydown', galleryKeyHandler);
+}
+
+function galleryKeyHandler(e) {
+    if (e.key === 'ArrowRight') galleryNav(1);
+    if (e.key === 'ArrowLeft') galleryNav(-1);
+    if (e.key === 'Escape') closeGallery();
+}
+
+function galleryNav(dir) {
+    const photos = surpriseData.memories.filter(m => m.photo);
+    galleryIndex = (galleryIndex + dir + photos.length) % photos.length;
+    document.getElementById('galleryImg').src = photos[galleryIndex].photo;
+    document.getElementById('galleryTitle').textContent = photos[galleryIndex].title;
+    document.getElementById('galleryDesc').textContent = photos[galleryIndex].description || '';
+    document.getElementById('galleryMeta').textContent = photos[galleryIndex].createdAtFormatted;
+    updateGalleryDots(photos);
+}
+
+function updateGalleryDots(photos) {
+    const dots = document.getElementById('galleryDots');
+    if (!dots) return;
+    dots.innerHTML = photos.map((_, i) => 
+        `<span class="gallery-dot ${i === galleryIndex ? 'active' : ''}" onclick="galleryNav(${i - galleryIndex})"></span>`
+    ).join('');
+}
+
+function closeGallery() {
+    const overlay = document.getElementById('galleryOverlay');
+    if (overlay) overlay.remove();
+    document.removeEventListener('keydown', galleryKeyHandler);
 }
 
 function loadPoems() {
