@@ -54,8 +54,19 @@ function updatePlayerUI(playing) {
     if (btn) btn.textContent = playing ? '⏸' : '▶';
 }
 
+// Mobil cihaz tespiti
+function isMobile() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 // Şarkı çal / durdur
 function togglePlay(musicId, videoId) {
+    // Mobilde direkt YouTube'da aç
+    if (isMobile()) {
+        window.open(`https://music.youtube.com/watch?v=${videoId}`, '_blank');
+        return;
+    }
+
     if (!ytPlayerReady || !ytPlayer) {
         alert('Player yükleniyor, bir saniye bekle...');
         return;
