@@ -98,6 +98,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setupMessageKeyListener();
     setupKeyboardShortcuts();
     
+    // YouTube API yükle
+    loadYouTubeAPI();
+    
     // Update login avatars
     updateLoginAvatars();
     
@@ -625,8 +628,7 @@ function setupSurpriseSection() {
 
 // Surprise Functions
 function updateLoveCounter() {
-    // İlişki başlangıç tarihi (örnek: 1 Ocak 2024)
-    const startDate = new Date('2024-01-01');
+    const startDate = new Date('2024-12-07');
     const today = new Date();
     const daysTogether = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
     
@@ -1559,6 +1561,17 @@ function updateStats() {
     document.getElementById('musicCount').textContent = appData.music.length;
     document.getElementById('dreamCount').textContent = appData.dreams.length;
     document.getElementById('noteCount').textContent = appData.notes.length;
+    updateDaysCounter();
+}
+
+// Gün sayacı - 07.12.2024'ten itibaren
+function updateDaysCounter() {
+    const el = document.getElementById('daysTogether');
+    if (!el) return;
+    const start = new Date('2024-12-07');
+    const today = new Date();
+    const days = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+    el.textContent = days;
 }
 
 // Modal Management
@@ -1568,6 +1581,7 @@ function openModal(type) {
     const modalTitle = document.getElementById('modalTitle');
     const itemInput = document.getElementById('itemInput');
     const itemDescription = document.getElementById('itemDescription');
+    const youtubeField = document.getElementById('itemYoutubeUrl');
     
     const titles = {
         music: 'Yeni Müzik Ekle',
@@ -1586,6 +1600,12 @@ function openModal(type) {
     itemInput.value = '';
     itemDescription.value = '';
     
+    // YouTube alanını sadece müzikte göster
+    if (youtubeField) {
+        youtubeField.style.display = type === 'music' ? 'block' : 'none';
+        youtubeField.value = '';
+    }
+    
     modal.classList.remove('hidden');
     itemInput.focus();
 }
@@ -1599,9 +1619,11 @@ function closeModal() {
 function saveItem() {
     const itemInput = document.getElementById('itemInput');
     const itemDescription = document.getElementById('itemDescription');
+    const youtubeField = document.getElementById('itemYoutubeUrl');
     
     const title = itemInput.value.trim();
     const description = itemDescription.value.trim();
+    const youtubeUrl = youtubeField ? youtubeField.value.trim() : '';
     
     if (!title) {
         itemInput.focus();
@@ -1612,6 +1634,7 @@ function saveItem() {
         id: Date.now(),
         title: title,
         description: description,
+        youtubeUrl: youtubeUrl || null,
         createdBy: currentUser,
         createdAt: new Date().toISOString(),
         createdAtFormatted: new Date().toLocaleDateString('tr-TR', {
@@ -1650,6 +1673,12 @@ function deleteItem(type, id) {
 
 // Render Functions
 function renderSection(type) {
+    // Müzik için ayrı render sistemi
+    if (type === 'music') {
+        if (typeof renderMusicList === 'function') renderMusicList();
+        return;
+    }
+
     const container = document.getElementById(`${type}List`);
     const items = appData[type];
     
@@ -1683,6 +1712,13 @@ function renderSection(type) {
                 </div>
             </div>
             ${item.description ? `<div class="item-description">${escapeHtml(item.description)}</div>` : ''}
+            ${type === 'music' && item.youtubeUrl ? `
+                <div class="youtube-player" id="player-${item.id}">
+                    <button class="play-btn" onclick="toggleYoutube(${item.id}, '${getYoutubeId(item.youtubeUrl)}')">
+                        ▶ Çal
+                    </button>
+                </div>
+            ` : ''}
         </div>
     `).join('');
 }
@@ -1698,6 +1734,7 @@ function editItem(type, id) {
     const modalTitle = document.getElementById('editModalTitle');
     const itemInput = document.getElementById('editItemInput');
     const itemDescription = document.getElementById('editItemDescription');
+    const youtubeField = document.getElementById('editItemYoutubeUrl');
     
     const titles = {
         music: 'Müziği Düzenle',
@@ -1708,6 +1745,11 @@ function editItem(type, id) {
     modalTitle.textContent = titles[type];
     itemInput.value = item.title;
     itemDescription.value = item.description || '';
+    
+    if (youtubeField) {
+        youtubeField.style.display = type === 'music' ? 'block' : 'none';
+        youtubeField.value = item.youtubeUrl || '';
+    }
     
     modal.classList.remove('hidden');
     itemInput.focus();
@@ -1721,9 +1763,11 @@ function closeEditModal() {
 function saveEditedItem() {
     const itemInput = document.getElementById('editItemInput');
     const itemDescription = document.getElementById('editItemDescription');
+    const youtubeField = document.getElementById('editItemYoutubeUrl');
     
     const title = itemInput.value.trim();
     const description = itemDescription.value.trim();
+    const youtubeUrl = youtubeField ? youtubeField.value.trim() : '';
     
     if (!title) {
         itemInput.focus();
@@ -1734,6 +1778,7 @@ function saveEditedItem() {
     if (item) {
         item.title = title;
         item.description = description;
+        item.youtubeUrl = youtubeUrl || null;
         item.editedAt = new Date().toISOString();
         item.editedAtFormatted = new Date().toLocaleDateString('tr-TR', {
             day: 'numeric',
@@ -1785,6 +1830,40 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// YouTube yardımcı fonksiyonları
+function getYoutubeId(url) {
+    if (!url) return null;
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+    return match ? match[1] : null;
+}
+
+function toggleYoutube(itemId, videoId) {
+    const container = document.getElementById(`player-${itemId}`);
+    if (!container) return;
+
+    const existing = container.querySelector('iframe');
+    if (existing) {
+        // Zaten açıksa kapat
+        existing.remove();
+        container.querySelector('.play-btn').textContent = '▶ Çal';
+        return;
+    }
+
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    iframe.width = '100%';
+    iframe.height = '200';
+    iframe.frameBorder = '0';
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    iframe.style.borderRadius = '8px';
+    iframe.style.marginTop = '0.75rem';
+    iframe.style.display = 'block';
+
+    container.querySelector('.play-btn').textContent = '⏹ Kapat';
+    container.appendChild(iframe);
 }
 
 // Keyboard Shortcuts - güvenli versiyon

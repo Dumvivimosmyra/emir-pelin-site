@@ -6,6 +6,12 @@
     <title>Bizim Özel Yerimiz 💕</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="E & P">
 </head>
 <body>
     <!-- Login Screen -->
@@ -91,6 +97,12 @@
         <main class="app-content">
             <!-- Home Section -->
             <section id="homeSection" class="content-section active">
+                <!-- Geri Sayım Sayacı -->
+                <div class="days-counter-card">
+                    <span class="days-number" id="daysTogether">0</span>
+                    <span class="days-label">gündür birlikteyiz</span>
+                </div>
+
                 <div class="welcome-card">
                     <h2>Bizim Özel Alanımız</h2>
                     <p>Burası sadece ikimizin paylaştığı özel bir yer. Müziklerimizi, hayallerimizi ve birbirimize yazdığımız notları burada saklıyoruz.</p>
@@ -115,7 +127,7 @@
             <section id="musicSection" class="content-section">
                 <div class="section-header">
                     <h2>🎵 Müzik Listemiz</h2>
-                    <button class="add-btn" onclick="addMusic()">+ Ekle</button>
+                    <button class="add-btn" onclick="openMusicAddModal()">+ Ekle</button>
                 </div>
                 <div id="musicList" class="item-list">
                     <!-- Müzikler buraya eklenecek -->
@@ -199,7 +211,7 @@
                 <div class="surprise-container">
                     <div class="surprise-header">
                         <h2>🎁 Pelin'e Özel Sürprizler</h2>
-                        <p>Bu bölüm kalbimideki minik hanımefendi için hazırlandı! ❤️</p>
+                        <p>Bu bölüm kalbimideki minik hanımfendi için hazırlandı! ❤️</p>
                     </div>
                     
                     <div class="surprise-content" id="surpriseContent">
@@ -220,6 +232,7 @@
             <div class="modal-body">
                 <input type="text" id="itemInput" placeholder="Buraya yazın...">
                 <textarea id="itemDescription" placeholder="Açıklama (opsiyonel)"></textarea>
+                <input type="url" id="itemYoutubeUrl" placeholder="YouTube linki (opsiyonel)" style="display:none;">
             </div>
             <div class="modal-footer">
                 <button class="cancel-btn" onclick="closeModal()">İptal</button>
@@ -238,6 +251,7 @@
             <div class="modal-body">
                 <input type="text" id="editItemInput" placeholder="Buraya yazın...">
                 <textarea id="editItemDescription" placeholder="Açıklama (opsiyonel)"></textarea>
+                <input type="url" id="editItemYoutubeUrl" placeholder="YouTube linki (opsiyonel)" style="display:none;">
             </div>
             <div class="modal-footer">
                 <button class="cancel-btn" onclick="closeEditModal()">İptal</button>
@@ -252,13 +266,12 @@
     
     <!-- Our Scripts -->
     <script src="firebase-api.js"></script>
+    <script src="youtube-music.js"></script>
     <script src="script.js"></script>
     
     <!-- Firebase'i başlat -->
     <script>
-        // Firebase SDK yüklendikten sonra başlat
         document.addEventListener('DOMContentLoaded', function() {
-            // Biraz bekle ki diğer scriptler yüklensin
             setTimeout(() => {
                 if (window.firebase) {
                     initFirebase();
@@ -267,7 +280,15 @@
                 }
             }, 1000);
         });
+
+        // PWA - Service Worker kayıt
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/emir-pelin-site/sw.js')
+                    .then(reg => console.log('✅ SW kayıtlı:', reg.scope))
+                    .catch(err => console.log('❌ SW hatası:', err));
+            });
+        }
     </script>
 </body>
-
 </html>
