@@ -138,16 +138,15 @@ async function syncAllDataFromFirebase() {
         localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
     }
 
-    if (profilePhotos) {
-        Object.assign(window.profilePhotos, profilePhotos);
+    if (profilePhotos && typeof profilePhotos === 'object') {
+        if (window.profilePhotos) Object.assign(window.profilePhotos, profilePhotos);
         localStorage.setItem('profilePhotos', JSON.stringify(profilePhotos));
     }
 
     if (userCredentials && typeof userCredentials === 'object') {
-        Object.assign(window.userCredentials, userCredentials);
+        if (window.userCredentials) Object.assign(window.userCredentials, userCredentials);
         localStorage.setItem('userCredentials', JSON.stringify(userCredentials));
     }
-
     if (theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
@@ -210,8 +209,8 @@ function startRealtimeListeners() {
     });
 
     firebaseAPI.listenToData('profilePhotos', (data) => {
-        if (data) {
-            Object.assign(window.profilePhotos, data);
+        if (data && typeof data === 'object') {
+            if (window.profilePhotos) Object.assign(window.profilePhotos, data);
             localStorage.setItem('profilePhotos', JSON.stringify(data));
             if (typeof updateLoginAvatars === 'function') updateLoginAvatars();
             if (typeof updateProfileAvatar === 'function') updateProfileAvatar();
@@ -220,7 +219,7 @@ function startRealtimeListeners() {
 
     firebaseAPI.listenToData('userCredentials', (data) => {
         if (data && typeof data === 'object') {
-            Object.assign(window.userCredentials, data);
+            if (window.userCredentials) Object.assign(window.userCredentials, data);
             localStorage.setItem('userCredentials', JSON.stringify(data));
         }
     });
