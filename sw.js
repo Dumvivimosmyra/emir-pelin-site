@@ -1,10 +1,12 @@
-const CACHE_NAME = 'emir-pelin-v1';
+const CACHE_NAME = 'emir-pelin-v2';
 const ASSETS = [
-  '/emir-pelin-site/',
-  '/emir-pelin-site/index.html',
-  '/emir-pelin-site/style.css',
-  '/emir-pelin-site/script.js',
-  '/emir-pelin-site/firebase-api.js'
+  './',
+  './index.html',
+  './style.css',
+  './script.js',
+  './firebase-api.js',
+  './youtube-music.js',
+  './manifest.json'
 ];
 
 // Kurulum - dosyaları cache'e al
