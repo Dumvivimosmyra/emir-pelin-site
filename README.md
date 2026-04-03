@@ -1,119 +1,61 @@
-# 💕 Emir & Pelin - Web Sitesi
+# Emir & Pelin - Web Sitesi
 
-Modern, mobil uyumlu ve gerçek zamanlı senkronizasyonlu sevgi içerikli web uygulaması.
+Gerçek zamanlı senkronizasyonlu, PWA destekli kişisel web uygulaması.
 
-## 🌟 Özellikler
+## Özellikler
 
-### 👥 Kullanıcı Sistemi
-- **Çift Kullanıcı**: Emir Kağan & Pelin
-- **Güvenli Giriş**: Şifre korumalı (varsayılan: 123456)
-- **Profil Yönetimi**: Fotoğraf yükleme, şifre değiştirme
-
-### 💬 WhatsApp Tarzı Mesajlaşma
-- **Gerçek Zamanlı**: Anında mesaj senkronizasyonu
-- **Modern Tasarım**: Mesaj baloncukları, animasyonlar
-- **Mobil Uyumlu**: Dokunmatik optimizasyonu
-
-### 🎵 İçerik Yönetimi
-- **Müzikler**: Favori şarkıları ekle/düzenle/sil
-- **Hayaller**: Gelecek planlarını paylaş
-- **Notlar**: Özel notlar ve hatırlatmalar
-
-### 🎁 Sürpriz Bölümü
-- **Anı Kutusu**: Fotoğraflı anılar
-- **Sevgi Şiirleri**: Emir'in Pelin için yazdığı şiirler
-- **Özel Günler**: Takvim ve önemli tarihler
-- **Kalp Yağmuru**: Romantik animasyon
-
-### 🔥 Firebase Entegrasyonu
-- **Gerçek Zamanlı Senkronizasyon**: İstanbul ↔ Bursa
-- **Bulut Depolama**: Tüm veriler güvende
-- **Offline Destek**: İnternet yokken yerel çalışma
-
-### 🎨 Tasarım
-- **Dark/Light Tema**: Göz dostu mod seçenekleri
-- **Responsive**: Telefon, tablet, bilgisayar uyumlu
-- **Modern UI**: Gradient renkler, animasyonlar
-
-## 🚀 Kurulum
-
-### 1. Projeyi İndir
-```bash
-git clone https://github.com/[kullanici-adi]/emir-pelin-site.git
-cd emir-pelin-site
-```
-
-### 2. Firebase Kurulumu
-1. [Firebase Console](https://console.firebase.google.com)'a git
-2. Yeni proje oluştur
-3. Realtime Database ekle
-4. `firebase-api.js` dosyasındaki config'i güncelle
-
-### 3. Çalıştır
-```bash
-# Python ile
-python -m http.server 8000
-
-# Node.js ile
-npx serve .
-
-# Live Server ile (VS Code)
-Live Server uzantısını kullan
-```
-
-### 4. Erişim
-- **Yerel**: http://localhost:8000
-- **Canlı**: GitHub Pages üzerinden
-
-## 👤 Kullanıcı Bilgileri
-
-| Kullanıcı | Şifre | Rol |
-|-----------|-------|-----|
-| Emir Kağan | 123456 | Admin |
-| Pelin | 123456 | Admin |
-
-## 📱 Kullanım
-
-### Giriş Yapma
-1. Kullanıcı seç (Emir/Pelin)
-2. Şifre gir (123456)
-3. Giriş yap
+### Kullanıcı Sistemi
+- Çift kullanıcı: Emir Kağan & Pelin
+- Şifre korumalı giriş
+- Profil fotoğrafı yükleme, şifre değiştirme
 
 ### Mesajlaşma
-- Profil → Mesajlaşma bölümü
-- WhatsApp tarzı karşılıklı sohbet
-- Enter ile mesaj gönder
+- WhatsApp tarzı gerçek zamanlı mesajlaşma
+- Emoji reaksiyonlar (50+ emoji, uzun bas veya sağ tıkla)
+- Firebase ile anlık senkronizasyon
 
-### İçerik Ekleme
-- Ana sayfa → İlgili bölüm
-- ➕ butonuna tıkla
-- Bilgileri doldur ve kaydet
+### Müzik
+- YouTube API ile şarkı arama ve ekleme
+- Masaüstünde sayfada çalma, mobilde YouTube Music'te açma
+- Şarkı düzenleme (açıklama, şarkı değiştirme)
 
-### Sürpriz Özellikleri
-- Sürpriz bölümü → İstediğin kartı seç
-- Anı/şiir/tarih ekle
-- Gerçek zamanlı paylaşım
+### İçerik Yönetimi
+- Müzikler, Hayaller, Notlar - CRUD işlemleri
+- Tüm veriler Firebase'e kaydediliyor
 
-## 🔧 Teknik Detaylar
+### Sürpriz Bölümü
+- Anı Kutusu - fotoğraflı anılar, tam ekran galeri (swipe destekli)
+- Sevgi Şiirleri
+- Özel Günler takvimi
+- Kalp Yağmuru animasyonu
+- 365 günlük özel mesajlar
 
-### Teknolojiler
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Backend**: Firebase Realtime Database
-- **Hosting**: GitHub Pages
-- **Responsive**: CSS Grid, Flexbox
+### PWA
+- Telefona uygulama olarak kurulabilir
+- Offline çalışma desteği
+- Ana ekrana ekle (Android & iOS)
 
-### Dosya Yapısı
+### Diğer
+- Dark/Light tema
+- Gün sayacı (07.12.2024'ten itibaren)
+- Responsive tasarım
+
+## Dosya Yapısı
+
 ```
 emir-pelin-site/
 ├── index.html          # Ana sayfa
-├── style.css           # Stil dosyası
+├── style.css           # Stiller
 ├── script.js           # Ana JavaScript
 ├── firebase-api.js     # Firebase entegrasyonu
-├── README.md           # Bu dosya
-└── KALDIK-BURDA.md    # Geliştirme notları
+├── youtube-music.js    # YouTube müzik sistemi
+├── manifest.json       # PWA manifest
+├── sw.js               # Service Worker
+└── README.md
 ```
 
-### Firebase Veritabanı
+## Firebase Veritabanı
+
 ```json
 {
   "music": [...],
@@ -123,82 +65,28 @@ emir-pelin-site/
   "memories": [...],
   "poems": [...],
   "specialDates": [...],
-  "profilePhotos": {...},
-  "userCredentials": {...},
+  "profilePhotos": {},
+  "userCredentials": {},
   "theme": "light/dark"
 }
 ```
 
-## 🔒 Güvenlik
+## Lokal Geliştirme
 
-### Mevcut Durum
-- Firebase test modunda (geliştirme için)
-- Basit şifre koruması
-- Kişisel kullanım için uygun
+```bash
+npx serve .
+# http://localhost:3000
+```
 
-### Üretim Önerileri
-- Firebase güvenlik kuralları güncelle
-- Güçlü şifreler kullan
-- HTTPS zorunlu kıl
+## Deploy
 
-## 🎯 Gelecek Planları
+```bash
+git add .
+git commit -m "açıklama"
+git push
+# GitHub Pages otomatik güncellenir
+```
 
-### Kısa Vadede (1-2 Hafta)
-- [ ] **PWA Desteği**: Telefona kurulabilir uygulama
-- [ ] **Bildirimler**: Yeni mesaj bildirimleri
-- [ ] **Fotoğraf Galerisi**: Anı kutusunu genişlet
-- [ ] **Ses Mesajları**: Sesli mesajlaşma
-- [ ] **Emoji Reaksiyonları**: Mesajlara tepki verme
-
-### Orta Vadede (1 Ay)
-- [ ] **Spotify Entegrasyonu**: Müzik çalma
-- [ ] **Harita Entegrasyonu**: Gittiğiniz yerler
-- [ ] **Takvim Senkronizasyonu**: Google Calendar
-- [ ] **Video Çağrı**: WebRTC ile görüntülü konuşma
-- [ ] **Günlük Sistemi**: Kişisel günlükler
-
-### Uzun Vadede (3+ Ay)
-- [ ] **Mobil Uygulama**: React Native/Flutter
-- [ ] **AI Önerileri**: Akıllı içerik önerileri
-- [ ] **Çoklu Dil**: İngilizce desteği
-- [ ] **Tema Editörü**: Özel renkler
-- [ ] **Backup Sistemi**: Veri yedekleme
-
-### Teknik İyileştirmeler
-- [ ] **Performans**: Lazy loading, caching
-- [ ] **SEO**: Meta taglar, sitemap
-- [ ] **Analytics**: Kullanım istatistikleri
-- [ ] **Testing**: Unit testler
-- [ ] **CI/CD**: Otomatik deployment
-
-## 🐛 Bilinen Sorunlar
-
-- ~~JavaScript konsol hatası (satır 1777)~~ → Çözüldü ✅
-- ~~Firebase senkronizasyon sorunları~~ → Çözüldü ✅
-- ~~Avatar sistemi karışıklığı~~ → Kaldırıldı ✅
-
-## 🤝 Katkıda Bulunma
-
-Bu proje kişisel kullanım için geliştirilmiştir. Önerilerinizi Issues bölümünden paylaşabilirsiniz.
-
-## 📄 Lisans
-
-Bu proje kişisel kullanım içindir. Ticari kullanım yasaktır.
-
-## 💖 Teşekkürler
-
-Bu proje Emir Kağan ve Pelin'in sevgisine adanmıştır. 
-
----
-
-**Son Güncelleme**: Ocak 2026  
-**Versiyon**: 2.0.0 (Firebase Edition)  
-**Durum**: Üretim Hazır ✅
-
-## 📞 İletişim
-
-Sorularınız için GitHub Issues kullanın.
-
----
-
-*"Bu sevgi, iki kalbin tek ritimde atmasıdır." 💕*
+**Versiyon**: 3.0.0  
+**Son Güncelleme**: Nisan 2026  
+**Durum**: Aktif geliştirme
