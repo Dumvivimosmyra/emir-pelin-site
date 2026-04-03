@@ -235,3 +235,45 @@ function startRealtimeListeners() {
 
 // enhanceSaveData - artık gerekmiyor, script.js zaten Firebase'e kaydediyor
 function enhanceSaveData() {}
+
+// FCM - Bildirim sistemi
+const FCM_VAPID_KEY = 'BKlHoM4QYDIYpczb3vFeKf-qyDjJDTgqa98WJhUd6iAFwLiHl-s6kA49MvKKjh8NhncI0kqgyyjsM8iaCI_AxHk';
+
+async function initFCM(userId) {
+    if (!('Notification' in window)) return;
+
+    try {
+        // Firebase Messaging yükle
+        const messaging = firebase.messaging();
+
+        // Bildirim izni iste
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            console.log('Bildirim izni reddedildi');
+            return;
+        }
+
+        // FCM token al
+        const token = await messaging.getToken({ vapidKey: FCM_VAPID_KEY });
+        if (!token) return;
+
+        // Token'ı Firebase'e kaydet
+        await firebase.database().ref(`/fcmTokens/${userId}`).set(token);
+        console.log('FCM token kaydedildi:', userId);
+
+        // Ön planda bildirim al
+        messaging.onMessage((payload) => {
+            const { title, body } = payload.notification;
+            if (Notification.permission === 'granted') {
+                new Notification(title, {
+                    body,
+                    icon: '/icon.png',
+                    vibrate: [200, 100, 200]
+                });
+            }
+        });
+
+    } catch (err) {
+        console.error('FCM hatasi:', err);
+    }
+}

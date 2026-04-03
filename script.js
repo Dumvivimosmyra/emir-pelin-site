@@ -219,14 +219,18 @@ function showError(message) {
 function login(user) {
     currentUser = user;
     localStorage.setItem('currentUser', user);
-    
-    // Add login animation
+
+    // FCM bildirim sistemi başlat
+    if (typeof initFCM === 'function') {
+        setTimeout(() => initFCM(user), 2000);
+    }
+
     const loginScreen = document.getElementById('loginScreen');
     const mainApp = document.getElementById('mainApp');
-    
+
     loginScreen.style.transform = 'translateY(-100%)';
     loginScreen.style.opacity = '0';
-    
+
     setTimeout(() => {
         loginScreen.classList.add('hidden');
         mainApp.classList.remove('hidden');

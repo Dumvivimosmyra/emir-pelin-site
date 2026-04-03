@@ -16,9 +16,10 @@ Site canlıda: https://dumvivimosmyra.github.io/emir-pelin-site/
 
 ## Bekleyen / Yarım Kalanlar
 
-- FCM push bildirimleri (Firebase Cloud Messaging) - altyapı hazır değil
+- **OneSignal bildirimleri** - onesignal.com'da hesap aç, App ID ve REST API Key al, sonra devam et. (Şu an site sorunu var, sonra dene)
+- Firebase Functions yolu denendi, Blaze planı (kart) gerektiriyor, bırakıldı
 - Mobil küçük kusurlar - test edilecek
-- Spotify entegrasyonu - denendi, karar verilmedi
+- Genel tasarım/UX düzenlemesi - mobil için özellikle
 
 ## Bilinen Sorunlar
 
