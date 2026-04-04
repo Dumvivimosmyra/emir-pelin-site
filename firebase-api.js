@@ -150,7 +150,7 @@ async function syncAllDataFromFirebase() {
     if (theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
-        if (typeof updateThemeToggle === 'function') updateThemeToggle();
+        if (typeof setTheme === 'function') setTheme(theme);
     }
 
     console.log('Firebase veriler yuklendi!');
@@ -228,7 +228,7 @@ function startRealtimeListeners() {
         if (data) {
             document.documentElement.setAttribute('data-theme', data);
             localStorage.setItem('theme', data);
-            if (typeof updateThemeToggle === 'function') updateThemeToggle();
+            if (typeof setTheme === 'function') setTheme(data);
         }
     });
 }

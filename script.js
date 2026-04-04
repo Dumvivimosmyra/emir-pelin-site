@@ -47,7 +47,6 @@ function loadUserSettings() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
         document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeToggle();
     }
 }
 
@@ -59,23 +58,20 @@ function saveUserSettings() {
 // Theme functions
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    
-    // Firebase'e kaydet
-    if (window.firebaseAPI) {
-        window.firebaseAPI.saveData('theme', newTheme);
-    }
-    
-    updateThemeToggle();
+    const newTheme = currentTheme === 'dark' ? 'default' : 'dark';
+    setTheme(newTheme);
 }
 
-function updateThemeToggle() {
-    const themeToggle = document.getElementById('themeToggle');
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    if (window.firebaseAPI) {
+        window.firebaseAPI.saveData('theme', theme);
+    }
+    // Aktif tema butonunu güncelle
+    document.querySelectorAll('.theme-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === theme);
+    });
 }
 
 // Initialize App
@@ -271,50 +267,30 @@ function showMainApp() {
 
 // Profile Section Setup
 function setupProfileSection() {
-    const currentAvatar = document.getElementById('currentAvatar');
     const profileName = document.getElementById('profileName');
     const avatarGrid = document.getElementById('profileAvatarGrid');
-    const pelinSpecialSection = document.getElementById('pelinSpecialSection');
-    
-    // Show current avatar
+
     updateProfileAvatar();
-    profileName.textContent = userCredentials[currentUser].name;
-    
-    // Replace avatar grid with photo upload buttons
+    if (profileName) profileName.textContent = userCredentials[currentUser].name;
+
     const user = profilePhotos[currentUser];
-    avatarGrid.innerHTML = `
-        <div class="photo-upload-section">
-            <button class="add-btn" onclick="openPhotoUpload()" style="width: 100%; margin-bottom: 1rem;">
-                📸 Fotoğraf Yükle
-            </button>
-            ${user.photo ? `
-                <button class="remove-btn" onclick="removePhoto()" style="width: 100%; background: #ef4444; color: white;">
-                    🗑️ Fotoğrafı Kaldır
+    if (avatarGrid) {
+        avatarGrid.innerHTML = `
+            <div class="photo-upload-section">
+                <button class="add-btn" onclick="openPhotoUpload()" style="width:100%;margin-bottom:0.5rem;">
+                    📸 Fotoğraf Yükle
                 </button>
-            ` : ''}
-        </div>
-    `;
-    
-    // Mesajlaşma sistemi - WhatsApp tarzı (her iki kullanıcı için)
-    pelinSpecialSection.innerHTML = `
-        <div class="messaging-system">
-            <h3>💬 Mesajlaşma</h3>
-            <div class="chat-container">
-                <div class="messages-area" id="messagesArea">
-                    <!-- Mesajlar buraya gelecek -->
-                </div>
-                <div class="message-input-area">
-                    <textarea id="messageInput" placeholder="Mesaj yaz..." rows="1"></textarea>
-                    <button onclick="sendMessage()" class="send-btn">➤</button>
-                </div>
+                ${user.photo ? `<button class="remove-btn" onclick="removePhoto()" style="width:100%;background:#ef4444;color:white;">🗑️ Kaldır</button>` : ''}
             </div>
-        </div>
-    `;
-    
-    // Mesajları yükle
-    loadMessages();
-    
-    // Update profile stats
+        `;
+    }
+
+    // Aktif temayı işaretle
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'default';
+    document.querySelectorAll('.theme-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === currentTheme);
+    });
+
     updateProfileStats();
 }
 
@@ -1689,19 +1665,20 @@ function deleteSpecialDate(id) {
 
 // Navigation
 function showSection(sectionName) {
-    // Update navigation
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
-    
-    // Update content
-    document.querySelectorAll('.content-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    document.getElementById(`${sectionName}Section`).classList.add('active');
-    
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    const navBtn = document.querySelector(`[data-section="${sectionName}"]`);
+    if (navBtn) navBtn.classList.add('active');
+
+    document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+    const section = document.getElementById(`${sectionName}Section`);
+    if (section) section.classList.add('active');
+
     currentSection = sectionName;
+
+    // Chat açılınca mesajları yükle ve scroll'a git
+    if (sectionName === 'chat') {
+        loadMessages();
+    }
 }
 
 // Data Management

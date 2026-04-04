@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bizim Özel Yerimiz 💕</title>
+    <title>E & P</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="E & P">
@@ -18,21 +18,18 @@
     <div id="loginScreen" class="login-screen">
         <div class="login-container">
             <div class="login-header">
-                <h1>💕</h1>
-                <h2>Emir & Pelin</h2>
-                <p>Bizim özel yerimiz</p>
+                <h2>E & P</h2>
+                <p>Giriş yap</p>
             </div>
-            
             <div class="login-form">
                 <div class="user-selection">
                     <div class="user-option" onclick="selectUser('emir')">
                         <div class="user-avatar-display">
                             <div class="selected-avatar" id="emirAvatar"></div>
                         </div>
-                        <span class="user-name">Emir Kağan</span>
+                        <span class="user-name">Emir</span>
                         <input type="radio" name="selectedUser" value="emir" id="userEmir">
                     </div>
-                    
                     <div class="user-option" onclick="selectUser('pelin')">
                         <div class="user-avatar-display">
                             <div class="selected-avatar" id="pelinAvatar"></div>
@@ -41,10 +38,9 @@
                         <input type="radio" name="selectedUser" value="pelin" id="userPelin">
                     </div>
                 </div>
-                
                 <div class="password-section">
                     <input type="password" id="passwordInput" placeholder="Şifre" maxlength="20">
-                    <button class="login-btn" onclick="attemptLogin()">Giriş Yap</button>
+                    <button class="login-btn" onclick="attemptLogin()">Giriş</button>
                 </div>
             </div>
         </div>
@@ -55,69 +51,45 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-content">
-                <h1 id="welcomeMessage">Hoş Geldin 💕</h1>
+                <span id="welcomeMessage" class="header-title">E & P</span>
                 <div class="header-actions">
-                    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
                     <button class="logout-btn" onclick="logout()">Çıkış</button>
                 </div>
             </div>
         </header>
 
-        <!-- Navigation -->
-        <nav class="main-nav">
-            <div class="nav-container">
-                <button class="nav-btn active" onclick="showSection('home')" data-section="home">
-                    <span>🏠</span>
-                    <small>Ana Sayfa</small>
-                </button>
-                <button class="nav-btn" onclick="showSection('music')" data-section="music">
-                    <span>🎵</span>
-                    <small>Müzikler</small>
-                </button>
-                <button class="nav-btn" onclick="showSection('dreams')" data-section="dreams">
-                    <span>✨</span>
-                    <small>Hayaller</small>
-                </button>
-                <button class="nav-btn" onclick="showSection('notes')" data-section="notes">
-                    <span>💌</span>
-                    <small>Notlar</small>
-                </button>
-                <button class="nav-btn" onclick="showSection('profile')" data-section="profile">
-                    <span>⚙️</span>
-                    <small>Profil</small>
-                </button>
-                <button class="nav-btn" onclick="showSection('surprise')" data-section="surprise">
-                    <span>🎁</span>
-                    <small>Sürpriz</small>
-                </button>
-            </div>
-        </nav>
-
         <!-- Content Sections -->
         <main class="app-content">
             <!-- Home Section -->
             <section id="homeSection" class="content-section active">
-                <!-- Geri Sayım Sayacı -->
                 <div class="days-counter-card">
                     <span class="days-number" id="daysTogether">0</span>
-                    <span class="days-label">gündür birlikteyiz</span>
+                    <span class="days-label">gün</span>
                 </div>
+                <div class="stats-row">
+                    <div class="stat-box" onclick="showSection('music')">
+                        <span class="stat-number" id="musicCount">0</span>
+                        <span class="stat-label">Müzik</span>
+                    </div>
+                    <div class="stat-box" onclick="showSection('dreams')">
+                        <span class="stat-number" id="dreamCount">0</span>
+                        <span class="stat-label">Hayal</span>
+                    </div>
+                    <div class="stat-box" onclick="showSection('notes')">
+                        <span class="stat-number" id="noteCount">0</span>
+                        <span class="stat-label">Not</span>
+                    </div>
+                </div>
+            </section>
 
-                <div class="welcome-card">
-                    <h2>Bizim Özel Alanımız</h2>
-                    <p>Burası sadece ikimizin paylaştığı özel bir yer. Müziklerimizi, hayallerimizi ve birbirimize yazdığımız notları burada saklıyoruz.</p>
-                    <div class="stats">
-                        <div class="stat">
-                            <span class="stat-number" id="musicCount">0</span>
-                            <span class="stat-label">Müzik</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number" id="dreamCount">0</span>
-                            <span class="stat-label">Hayal</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number" id="noteCount">0</span>
-                            <span class="stat-label">Not</span>
+            <!-- Chat Section -->
+            <section id="chatSection" class="content-section">
+                <div class="messaging-system">
+                    <div class="chat-container">
+                        <div class="messages-area" id="messagesArea"></div>
+                        <div class="message-input-area">
+                            <textarea id="messageInput" placeholder="Mesaj yaz..." rows="1"></textarea>
+                            <button onclick="sendMessage()" class="send-btn">➤</button>
                         </div>
                     </div>
                 </div>
@@ -126,100 +98,157 @@
             <!-- Music Section -->
             <section id="musicSection" class="content-section">
                 <div class="section-header">
-                    <h2>🎵 Müzik Listemiz</h2>
+                    <h2>Müzikler</h2>
                     <button class="add-btn" onclick="openMusicAddModal()">+ Ekle</button>
                 </div>
-                <div id="musicList" class="item-list">
-                    <!-- Müzikler buraya eklenecek -->
-                </div>
+                <div id="musicList" class="item-list"></div>
             </section>
 
             <!-- Dreams Section -->
             <section id="dreamsSection" class="content-section">
                 <div class="section-header">
-                    <h2>✨ Hayallerimiz</h2>
+                    <h2>Hayaller</h2>
                     <button class="add-btn" onclick="addDream()">+ Ekle</button>
                 </div>
-                <div id="dreamsList" class="item-list">
-                    <!-- Hayaller buraya eklenecek -->
-                </div>
+                <div id="dreamsList" class="item-list"></div>
             </section>
 
             <!-- Notes Section -->
             <section id="notesSection" class="content-section">
                 <div class="section-header">
-                    <h2>💌 Notlarımız</h2>
+                    <h2>Notlar</h2>
                     <button class="add-btn" onclick="addNote()">+ Ekle</button>
                 </div>
-                <div id="notesList" class="item-list">
-                    <!-- Notlar buraya eklenecek -->
+                <div id="notesList" class="item-list"></div>
+            </section>
+
+            <!-- Surprise Section -->
+            <section id="surpriseSection" class="content-section">
+                <div class="surprise-grid">
+                    <div class="surprise-card" onclick="openMemorySection()">
+                        <div class="surprise-icon">📸</div>
+                        <div class="surprise-title">Anılar</div>
+                    </div>
+                    <div class="surprise-card" onclick="openPoemSection()">
+                        <div class="surprise-icon">📝</div>
+                        <div class="surprise-title">Şiirler</div>
+                    </div>
+                    <div class="surprise-card" onclick="openSpecialDatesSection()">
+                        <div class="surprise-icon">📅</div>
+                        <div class="surprise-title">Özel Günler</div>
+                    </div>
+                    <div class="surprise-card" onclick="startHeartRain()">
+                        <div class="surprise-icon">💖</div>
+                        <div class="surprise-title">Kalp Yağmuru</div>
+                    </div>
                 </div>
+                <div id="surpriseContent"></div>
             </section>
 
             <!-- Profile Section -->
             <section id="profileSection" class="content-section">
                 <div class="profile-card">
                     <div class="profile-header">
-                        <div class="current-avatar" id="currentAvatar">👨</div>
-                        <h2 id="profileName">Emir Kağan</h2>
+                        <div class="current-avatar" id="currentAvatar">👤</div>
+                        <h2 id="profileName"></h2>
                     </div>
-                    
                     <div class="profile-settings">
                         <div class="setting-group">
-                            <label>Avatar Seç</label>
-                            <div class="avatar-grid" id="profileAvatarGrid">
-                                <!-- Avatar seçenekleri buraya eklenecek -->
+                            <label>Fotoğraf</label>
+                            <div class="avatar-grid" id="profileAvatarGrid"></div>
+                        </div>
+                        <div class="setting-group">
+                            <label>Tema</label>
+                            <div class="theme-grid" id="themeGrid">
+                                <button class="theme-option" data-theme="default" onclick="setTheme('default')">
+                                    <span class="theme-dot" style="background:linear-gradient(135deg,#667eea,#764ba2)"></span>
+                                    <span>Mor</span>
+                                </button>
+                                <button class="theme-option" data-theme="dark" onclick="setTheme('dark')">
+                                    <span class="theme-dot" style="background:linear-gradient(135deg,#0f172a,#1e293b)"></span>
+                                    <span>Koyu</span>
+                                </button>
+                                <button class="theme-option" data-theme="navy" onclick="setTheme('navy')">
+                                    <span class="theme-dot" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"></span>
+                                    <span>Lacivert</span>
+                                </button>
+                                <button class="theme-option" data-theme="green" onclick="setTheme('green')">
+                                    <span class="theme-dot" style="background:linear-gradient(135deg,#166534,#22c55e)"></span>
+                                    <span>Yeşil</span>
+                                </button>
+                                <button class="theme-option" data-theme="orange" onclick="setTheme('orange')">
+                                    <span class="theme-dot" style="background:linear-gradient(135deg,#c2410c,#f97316)"></span>
+                                    <span>Turuncu</span>
+                                </button>
+                                <button class="theme-option" data-theme="rose" onclick="setTheme('rose')">
+                                    <span class="theme-dot" style="background:linear-gradient(135deg,#be185d,#f472b6)"></span>
+                                    <span>Pembe</span>
+                                </button>
                             </div>
                         </div>
-                        
                         <div class="setting-group">
                             <label>Şifre Değiştir</label>
                             <div class="password-change">
                                 <input type="password" id="currentPassword" placeholder="Mevcut şifre">
                                 <input type="password" id="newPassword" placeholder="Yeni şifre">
-                                <button class="save-btn" onclick="changePassword()">Şifreyi Değiştir</button>
+                                <button class="save-btn" onclick="changePassword()">Kaydet</button>
                             </div>
                         </div>
-                        
                         <div class="setting-group">
                             <label>İstatistikler</label>
                             <div class="profile-stats">
                                 <div class="stat-item">
-                                    <span class="stat-label">Toplam Müzik:</span>
+                                    <span class="stat-label">Müzik</span>
                                     <span class="stat-value" id="profileMusicCount">0</span>
                                 </div>
                                 <div class="stat-item">
-                                    <span class="stat-label">Toplam Hayal:</span>
+                                    <span class="stat-label">Hayal</span>
                                     <span class="stat-value" id="profileDreamCount">0</span>
                                 </div>
                                 <div class="stat-item">
-                                    <span class="stat-label">Toplam Not:</span>
+                                    <span class="stat-label">Not</span>
                                     <span class="stat-value" id="profileNoteCount">0</span>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="setting-group" id="pelinSpecialSection">
-                            <!-- Pelin'e özel bölüm buraya eklenecek -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Surprise Section -->
-            <section id="surpriseSection" class="content-section">
-                <div class="surprise-container">
-                    <div class="surprise-header">
-                        <h2>🎁 Pelin'e Özel Sürprizler</h2>
-                        <p>Bu bölüm kalbimideki minik hanımfendi için hazırlandı! ❤️</p>
-                    </div>
-                    
-                    <div class="surprise-content" id="surpriseContent">
-                        <!-- Sürpriz içeriği buraya eklenecek -->
                     </div>
                 </div>
             </section>
         </main>
+
+        <!-- Navigation -->
+        <nav class="main-nav">
+            <div class="nav-container">
+                <button class="nav-btn active" onclick="showSection('home')" data-section="home">
+                    <span>🏠</span>
+                    <small>Ana</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('chat')" data-section="chat">
+                    <span>💬</span>
+                    <small>Mesaj</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('music')" data-section="music">
+                    <span>🎵</span>
+                    <small>Müzik</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('dreams')" data-section="dreams">
+                    <span>✨</span>
+                    <small>Hayaller</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('notes')" data-section="notes">
+                    <span>📝</span>
+                    <small>Notlar</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('surprise')" data-section="surprise">
+                    <span>🎁</span>
+                    <small>Anılar</small>
+                </button>
+                <button class="nav-btn" onclick="showSection('profile')" data-section="profile">
+                    <span>⚙️</span>
+                    <small>Profil</small>
+                </button>
+            </div>
+        </nav>
     </div>
 
     <!-- Add Item Modal -->
@@ -263,26 +292,18 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
-    
-    <!-- Our Scripts -->
+
+    <!-- Scripts -->
     <script src="firebase-api.js"></script>
     <script src="youtube-music.js"></script>
     <script src="script.js"></script>
-    
-    <!-- Firebase'i başlat -->
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
-                if (window.firebase) {
-                    initFirebase();
-                } else {
-                    console.error('Firebase SDK yüklenemedi');
-                }
+                if (window.firebase) initFirebase();
             }, 1000);
         });
-
-        // PWA - Service Worker kayıt
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')

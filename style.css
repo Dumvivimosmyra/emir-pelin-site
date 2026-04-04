@@ -6,7 +6,6 @@
 }
 
 :root {
-    /* Light Theme */
     --bg-primary: #f8fafc;
     --bg-secondary: #ffffff;
     --bg-tertiary: #f1f5f9;
@@ -15,12 +14,12 @@
     --border-color: #e2e8f0;
     --accent-color: #667eea;
     --accent-hover: #5a67d8;
-    --shadow: 0 4px 12px rgba(0,0,0,0.05);
-    --shadow-hover: 0 8px 25px rgba(0,0,0,0.1);
+    --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
 }
 
 [data-theme="dark"] {
-    /* Dark Theme */
     --bg-primary: #0f172a;
     --bg-secondary: #1e293b;
     --bg-tertiary: #334155;
@@ -29,8 +28,65 @@
     --border-color: #475569;
     --accent-color: #818cf8;
     --accent-hover: #6366f1;
-    --shadow: 0 4px 12px rgba(0,0,0,0.3);
-    --shadow-hover: 0 8px 25px rgba(0,0,0,0.4);
+    --accent-gradient: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-hover: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+[data-theme="navy"] {
+    --bg-primary: #0d1b2a;
+    --bg-secondary: #1b2838;
+    --bg-tertiary: #243447;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --border-color: #2d4a6b;
+    --accent-color: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-gradient: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-hover: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+[data-theme="green"] {
+    --bg-primary: #f0fdf4;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #dcfce7;
+    --text-primary: #14532d;
+    --text-secondary: #166534;
+    --border-color: #bbf7d0;
+    --accent-color: #16a34a;
+    --accent-hover: #15803d;
+    --accent-gradient: linear-gradient(135deg, #166534 0%, #22c55e 100%);
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+[data-theme="orange"] {
+    --bg-primary: #fff7ed;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #ffedd5;
+    --text-primary: #7c2d12;
+    --text-secondary: #9a3412;
+    --border-color: #fed7aa;
+    --accent-color: #ea580c;
+    --accent-hover: #c2410c;
+    --accent-gradient: linear-gradient(135deg, #c2410c 0%, #f97316 100%);
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+[data-theme="rose"] {
+    --bg-primary: #fff1f2;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #ffe4e6;
+    --text-primary: #881337;
+    --text-secondary: #9f1239;
+    --border-color: #fecdd3;
+    --accent-color: #e11d48;
+    --accent-hover: #be123c;
+    --accent-gradient: linear-gradient(135deg, #be185d 0%, #f472b6 100%);
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
 }
 
 body {
@@ -2528,4 +2584,229 @@ input[type="date"]:focus {
 
 .message {
     position: relative;
+}
+
+/* Header sadeleştirme */
+.header-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Ana sayfa stats row */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.stat-box {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1rem 0.5rem;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+}
+
+.stat-box:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--accent-color);
+}
+
+.stat-box .stat-number {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.stat-box .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+/* Gün sayacı sadeleştirme */
+.days-counter-card {
+    background: var(--accent-gradient);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    color: white;
+    box-shadow: var(--shadow-hover);
+}
+
+.days-number {
+    display: block;
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -2px;
+}
+
+.days-label {
+    display: block;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-top: 0.25rem;
+}
+
+/* Sürpriz grid sadeleştirme */
+.surprise-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.surprise-card {
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.surprise-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--accent-color);
+}
+
+.surprise-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.surprise-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Tema seçici */
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.theme-option {
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.6rem 0.4rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s ease;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+}
+
+.theme-option:hover,
+.theme-option.active {
+    border-color: var(--accent-color);
+    background: var(--bg-secondary);
+}
+
+.theme-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Nav altta */
+.main-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    z-index: 100;
+    padding: 0.25rem 0;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-around;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem 0.25rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+    flex: 1;
+    min-width: 0;
+}
+
+.nav-btn.active {
+    color: var(--accent-color);
+}
+
+.nav-btn span {
+    font-size: 1.2rem;
+}
+
+.nav-btn small {
+    font-size: 0.6rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Content padding for fixed nav */
+.app-content {
+    flex: 1;
+    padding: 1rem;
+    padding-bottom: 80px;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Chat section - mesajlaşma artık ayrı bölümde */
+#chatSection .messaging-system {
+    margin-top: 0;
+}
+
+#chatSection .chat-container {
+    height: calc(100vh - 180px);
+    display: flex;
+    flex-direction: column;
+}
+
+#chatSection .messages-area {
+    flex: 1;
+    height: auto;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .days-number { font-size: 2.75rem; }
+    .nav-btn span { font-size: 1.1rem; }
+    .theme-grid { grid-template-columns: repeat(3, 1fr); }
 }
