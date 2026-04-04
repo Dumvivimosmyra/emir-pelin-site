@@ -254,8 +254,7 @@ async function initOneSignal(userId) {
             await OneSignal.init({
                 appId: ONESIGNAL_APP_ID,
                 notifyButton: { enable: false },
-                allowLocalhostAsSecureOrigin: true,
-                serviceWorkerPath: '/emir-pelin-site/OneSignalSDKWorker.js'
+                allowLocalhostAsSecureOrigin: true
             });
 
             await OneSignal.Notifications.requestPermission();
