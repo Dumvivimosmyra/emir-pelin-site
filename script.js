@@ -220,10 +220,10 @@ function login(user) {
     currentUser = user;
     localStorage.setItem('currentUser', user);
 
-    // OneSignal bildirim sistemi başlat
-    if (typeof initOneSignal === 'function') {
-        setTimeout(() => initOneSignal(user), 2000);
-    }
+    // OneSignal bildirim sistemi başlat - devre dışı
+    // if (typeof initOneSignal === 'function') {
+    //     setTimeout(() => initOneSignal(user), 2000);
+    // }
 
     const loginScreen = document.getElementById('loginScreen');
     const mainApp = document.getElementById('mainApp');
@@ -351,14 +351,7 @@ function sendMessage() {
         window.firebaseAPI.saveData('chatMessages', chatData.messages);
     }
 
-    // OneSignal bildirimi gönder
-    if (typeof sendOneSignalNotification === 'function') {
-        const receiver = currentUser === 'emir' ? 'pelin' : 'emir';
-        const senderName = userCredentials[currentUser].name;
-        const preview = message.length > 80 ? message.substring(0, 80) + '...' : message;
-        sendOneSignalNotification(receiver, senderName, preview);
-    }
-    
+
     messageInput.value = '';
     loadMessages();
     
