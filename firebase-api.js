@@ -244,19 +244,30 @@ async function initOneSignal(userId) {
     if (!window.OneSignalDeferred) return;
 
     window.OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-            appId: ONESIGNAL_APP_ID,
-            notifyButton: { enable: false },
-            allowLocalhostAsSecureOrigin: true
-        });
+        try {
+            // Zaten init edildiyse sadece login yap
+            if (OneSignal.initialized) {
+                await OneSignal.login(userId);
+                return;
+            }
 
-        // Bildirim izni iste
-        await OneSignal.Notifications.requestPermission();
+            await OneSignal.init({
+                appId: ONESIGNAL_APP_ID,
+                notifyButton: { enable: false },
+                allowLocalhostAsSecureOrigin: true,
+                serviceWorkerPath: '/emir-pelin-site/OneSignalSDKWorker.js'
+            });
 
-        // Kullanıcıya özel external ID ata (emir veya pelin)
-        await OneSignal.login(userId);
-
-        console.log('OneSignal hazir:', userId);
+            await OneSignal.Notifications.requestPermission();
+            await OneSignal.login(userId);
+            console.log('OneSignal hazir:', userId);
+        } catch (err) {
+            if (!err.message.includes('already initialized')) {
+                console.error('OneSignal hatasi:', err);
+            }
+            // Zaten init edildiyse sadece login yap
+            try { await OneSignal.login(userId); } catch(e) {}
+        }
     });
 }
 
