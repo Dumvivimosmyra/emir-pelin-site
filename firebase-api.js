@@ -236,44 +236,47 @@ function startRealtimeListeners() {
 // enhanceSaveData - artık gerekmiyor, script.js zaten Firebase'e kaydediyor
 function enhanceSaveData() {}
 
-// FCM - Bildirim sistemi
-const FCM_VAPID_KEY = 'BKlHoM4QYDIYpczb3vFeKf-qyDjJDTgqa98WJhUd6iAFwLiHl-s6kA49MvKKjh8NhncI0kqgyyjsM8iaCI_AxHk';
+// OneSignal Bildirim Sistemi
+const ONESIGNAL_APP_ID = '4dfc7a71-01bb-41b9-8416-1e68700da045';
+const ONESIGNAL_REST_KEY = 'wt7zguygpey5mxy73my2cxq3h';
 
-async function initFCM(userId) {
-    if (!('Notification' in window)) return;
+async function initOneSignal(userId) {
+    if (!window.OneSignalDeferred) return;
 
-    try {
-        // Firebase Messaging yükle
-        const messaging = firebase.messaging();
-
-        // Bildirim izni iste
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-            console.log('Bildirim izni reddedildi');
-            return;
-        }
-
-        // FCM token al
-        const token = await messaging.getToken({ vapidKey: FCM_VAPID_KEY });
-        if (!token) return;
-
-        // Token'ı Firebase'e kaydet
-        await firebase.database().ref(`/fcmTokens/${userId}`).set(token);
-        console.log('FCM token kaydedildi:', userId);
-
-        // Ön planda bildirim al
-        messaging.onMessage((payload) => {
-            const { title, body } = payload.notification;
-            if (Notification.permission === 'granted') {
-                new Notification(title, {
-                    body,
-                    icon: '/icon.png',
-                    vibrate: [200, 100, 200]
-                });
-            }
+    window.OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+            appId: ONESIGNAL_APP_ID,
+            notifyButton: { enable: false },
+            allowLocalhostAsSecureOrigin: true
         });
 
+        // Bildirim izni iste
+        await OneSignal.Notifications.requestPermission();
+
+        // Kullanıcıya özel external ID ata (emir veya pelin)
+        await OneSignal.login(userId);
+
+        console.log('OneSignal hazir:', userId);
+    });
+}
+
+async function sendOneSignalNotification(toUserId, title, message) {
+    try {
+        await fetch('https://onesignal.com/api/v1/notifications', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${ONESIGNAL_REST_KEY}`
+            },
+            body: JSON.stringify({
+                app_id: ONESIGNAL_APP_ID,
+                filters: [{ field: 'external_user_id', value: toUserId }],
+                headings: { en: title },
+                contents: { en: message },
+                url: 'https://dumvivimosmyra.github.io/emir-pelin-site/'
+            })
+        });
     } catch (err) {
-        console.error('FCM hatasi:', err);
+        console.error('Bildirim gonderilemedi:', err);
     }
 }
