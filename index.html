@@ -62,9 +62,31 @@
         <main class="app-content">
             <!-- Home Section -->
             <section id="homeSection" class="content-section active">
-                <div class="days-counter-card">
-                    <span class="days-number" id="daysTogether">0</span>
-                    <span class="days-label">gün</span>
+                <div class="live-counter-card">
+                    <div class="live-counter-row">
+                        <div class="live-unit">
+                            <span class="live-num" id="counterDays">0</span>
+                            <span class="live-label">gün</span>
+                        </div>
+                        <div class="live-sep">:</div>
+                        <div class="live-unit">
+                            <span class="live-num" id="counterHours">00</span>
+                            <span class="live-label">saat</span>
+                        </div>
+                        <div class="live-sep">:</div>
+                        <div class="live-unit">
+                            <span class="live-num" id="counterMinutes">00</span>
+                            <span class="live-label">dk</span>
+                        </div>
+                        <div class="live-sep">:</div>
+                        <div class="live-unit">
+                            <span class="live-num" id="counterSeconds">00</span>
+                            <span class="live-label">sn</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="daily-message-card">
+                    <p id="dailyMessage"></p>
                 </div>
                 <div class="stats-row">
                     <div class="stat-box" onclick="showSection('music')">
@@ -79,6 +101,11 @@
                         <span class="stat-number" id="noteCount">0</span>
                         <span class="stat-label">Not</span>
                     </div>
+                </div>
+                <div class="home-actions">
+                    <button class="home-action-btn" onclick="openMemorySection()">📸 Anılar</button>
+                    <button class="home-action-btn" onclick="openPoemSection()">📝 Şiirler</button>
+                    <button class="home-action-btn" onclick="openSpecialDatesSection()">📅 Özel Günler</button>
                 </div>
             </section>
 
@@ -160,29 +187,21 @@
                         <div class="setting-group">
                             <label>Tema</label>
                             <div class="theme-grid" id="themeGrid">
-                                <button class="theme-option" data-theme="default" onclick="setTheme('default')">
-                                    <span class="theme-dot" style="background:linear-gradient(135deg,#667eea,#764ba2)"></span>
-                                    <span>Mor</span>
+                                <button class="theme-option" data-theme="sakura" onclick="setTheme('sakura')">
+                                    <span class="theme-dot" style="background:linear-gradient(135deg,#f093b0,#e05c8a)"></span>
+                                    <span>🌸 Sakura</span>
                                 </button>
-                                <button class="theme-option" data-theme="dark" onclick="setTheme('dark')">
-                                    <span class="theme-dot" style="background:linear-gradient(135deg,#0f172a,#1e293b)"></span>
-                                    <span>Koyu</span>
+                                <button class="theme-option" data-theme="forest" onclick="setTheme('forest')">
+                                    <span class="theme-dot" style="background:linear-gradient(135deg,#2d5a32,#4caf6e)"></span>
+                                    <span>🌿 Forest</span>
                                 </button>
-                                <button class="theme-option" data-theme="navy" onclick="setTheme('navy')">
-                                    <span class="theme-dot" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)"></span>
-                                    <span>Lacivert</span>
+                                <button class="theme-option" data-theme="cosmos" onclick="setTheme('cosmos')">
+                                    <span class="theme-dot" style="background:linear-gradient(135deg,#3b2d8f,#7c6ff7)"></span>
+                                    <span>🌌 Cosmos</span>
                                 </button>
-                                <button class="theme-option" data-theme="green" onclick="setTheme('green')">
-                                    <span class="theme-dot" style="background:linear-gradient(135deg,#166534,#22c55e)"></span>
-                                    <span>Yeşil</span>
-                                </button>
-                                <button class="theme-option" data-theme="orange" onclick="setTheme('orange')">
-                                    <span class="theme-dot" style="background:linear-gradient(135deg,#c2410c,#f97316)"></span>
-                                    <span>Turuncu</span>
-                                </button>
-                                <button class="theme-option" data-theme="rose" onclick="setTheme('rose')">
-                                    <span class="theme-dot" style="background:linear-gradient(135deg,#be185d,#f472b6)"></span>
-                                    <span>Pembe</span>
+                                <button class="theme-option" data-theme="minimal" onclick="setTheme('minimal')">
+                                    <span class="theme-dot" style="background:linear-gradient(135deg,#888,#333)"></span>
+                                    <span>🤍 Minimal</span>
                                 </button>
                             </div>
                         </div>
@@ -192,23 +211,6 @@
                                 <input type="password" id="currentPassword" placeholder="Mevcut şifre">
                                 <input type="password" id="newPassword" placeholder="Yeni şifre">
                                 <button class="save-btn" onclick="changePassword()">Kaydet</button>
-                            </div>
-                        </div>
-                        <div class="setting-group">
-                            <label>İstatistikler</label>
-                            <div class="profile-stats">
-                                <div class="stat-item">
-                                    <span class="stat-label">Müzik</span>
-                                    <span class="stat-value" id="profileMusicCount">0</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Hayal</span>
-                                    <span class="stat-value" id="profileDreamCount">0</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Not</span>
-                                    <span class="stat-value" id="profileNoteCount">0</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -239,16 +241,21 @@
                     <span>📝</span>
                     <small>Notlar</small>
                 </button>
-                <button class="nav-btn" onclick="showSection('surprise')" data-section="surprise">
-                    <span>🎁</span>
-                    <small>Anılar</small>
-                </button>
                 <button class="nav-btn" onclick="showSection('profile')" data-section="profile">
                     <span>⚙️</span>
                     <small>Profil</small>
                 </button>
             </div>
         </nav>
+    </div>
+
+    <!-- Full Screen Page -->
+    <div id="fullPage" class="full-page hidden">
+        <div class="full-page-header">
+            <button class="full-page-back" onclick="closeSectionModal()">← Geri</button>
+            <h2 id="fullPageTitle"></h2>
+        </div>
+        <div class="full-page-body" id="fullPageBody"></div>
     </div>
 
     <!-- Add Item Modal -->

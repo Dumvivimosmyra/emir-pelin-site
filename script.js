@@ -1,4 +1,4 @@
-// App State
+﻿// App State
 let currentUser = null;
 let selectedUser = null;
 let currentSection = 'home';
@@ -47,6 +47,9 @@ function loadUserSettings() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
         document.documentElement.setAttribute('data-theme', savedTheme);
+        setTimeout(() => startThemeAnimation(savedTheme), 500);
+    } else {
+        setTimeout(() => startThemeAnimation('sakura'), 500);
     }
 }
 
@@ -68,10 +71,110 @@ function setTheme(theme) {
     if (window.firebaseAPI) {
         window.firebaseAPI.saveData('theme', theme);
     }
-    // Aktif tema butonunu güncelle
     document.querySelectorAll('.theme-option').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === theme);
     });
+    startThemeAnimation(theme);
+}
+
+// Tema animasyonları
+function startThemeAnimation(theme) {
+    document.querySelectorAll('.sakura-particle, .forest-corner, .cosmos-star, .theme-particle').forEach(el => el.remove());
+    if (window._themeAnimInterval) clearInterval(window._themeAnimInterval);
+
+    if (theme === 'sakura') {
+        spawnSakura();
+        window._themeAnimInterval = setInterval(spawnSakura, 1500);
+    } else if (theme === 'forest') {
+        spawnForestDeco();
+        spawnForestParticles();
+        window._themeAnimInterval = setInterval(spawnForestParticles, 3000);
+    } else if (theme === 'cosmos') {
+        spawnCosmosStars();
+        spawnCosmosParticles();
+        window._themeAnimInterval = setInterval(spawnCosmosParticles, 2500);
+    }
+    // minimal: animasyon yok
+}
+
+function spawnSakura() {
+    for (let i = 0; i < 3; i++) {
+        const p = document.createElement('div');
+        p.className = 'sakura-particle';
+        const size = Math.random() * 8 + 5;
+        p.style.cssText = `
+            width:${size}px; height:${size}px;
+            left:${Math.random() * 100}vw;
+            top:-10px;
+            animation-duration:${Math.random() * 8 + 8}s;
+            animation-delay:${Math.random() * 2}s;
+            opacity:0.4;
+        `;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 18000);
+    }
+}
+
+function spawnForestDeco() {
+    ['tl','tr','bl','br'].forEach(pos => {
+        const el = document.createElement('div');
+        el.className = `forest-corner ${pos}`;
+        document.body.appendChild(el);
+    });
+}
+
+function spawnForestParticles() {
+    for (let i = 0; i < 4; i++) {
+        const p = document.createElement('div');
+        p.className = 'theme-particle';
+        const size = Math.random() * 5 + 3;
+        p.style.cssText = `
+            width:${size}px; height:${size}px;
+            bottom:${Math.random() * 40 + 10}vh;
+            left:${Math.random() * 100}vw;
+            --drift:${(Math.random() - 0.5) * 60}px;
+            animation-duration:${Math.random() * 5 + 5}s;
+            animation-delay:${Math.random() * 2}s;
+        `;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 12000);
+    }
+}
+
+function spawnCosmosStars() {
+    for (let i = 0; i < 70; i++) {
+        const star = document.createElement('div');
+        star.className = 'cosmos-star';
+        const size = Math.random() * 2 + 0.5;
+        star.style.cssText = `
+            width:${size}px; height:${size}px;
+            top:${Math.random() * 100}vh;
+            left:${Math.random() * 100}vw;
+            animation-duration:${Math.random() * 4 + 2}s;
+            animation-delay:${Math.random() * 5}s;
+        `;
+        document.body.appendChild(star);
+    }
+}
+
+function spawnCosmosParticles() {
+    for (let i = 0; i < 4; i++) {
+        const p = document.createElement('div');
+        p.className = 'theme-particle';
+        const size = Math.random() * 4 + 2;
+        const colors = ['rgba(128,112,248,0.7)','rgba(167,139,250,0.6)','rgba(232,121,249,0.5)','rgba(99,102,241,0.6)'];
+        p.style.cssText = `
+            width:${size}px; height:${size}px;
+            bottom:${Math.random() * 70 + 5}vh;
+            left:${Math.random() * 100}vw;
+            background:${colors[Math.floor(Math.random() * colors.length)]};
+            --drift:${(Math.random() - 0.5) * 80}px;
+            animation-duration:${Math.random() * 6 + 5}s;
+            animation-delay:${Math.random() * 2}s;
+        `;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 14000);
+    }
 }
 
 // Initialize App
@@ -570,12 +673,13 @@ function resizeAndCropImage(imageSrc, callback, size = 200) {
 }
 
 function updateProfileStats() {
-    document.getElementById('profileMusicCount').textContent = 
-        appData.music.filter(item => item.createdBy === currentUser).length;
-    document.getElementById('profileDreamCount').textContent = 
-        appData.dreams.filter(item => item.createdBy === currentUser).length;
-    document.getElementById('profileNoteCount').textContent = 
-        appData.notes.filter(item => item.createdBy === currentUser).length;
+    // İstatistik elementleri HTML'den kaldırıldı, sessizce geç
+    const m = document.getElementById('profileMusicCount');
+    const d = document.getElementById('profileDreamCount');
+    const n = document.getElementById('profileNoteCount');
+    if (m) m.textContent = appData.music.filter(item => item.createdBy === currentUser).length;
+    if (d) d.textContent = appData.dreams.filter(item => item.createdBy === currentUser).length;
+    if (n) n.textContent = appData.notes.filter(item => item.createdBy === currentUser).length;
 }
 
 function changePassword() {
@@ -683,7 +787,7 @@ function setupSurpriseSection() {
     updateDailyMessage();
 }
 
-// Surprise Functions
+// Surprise Functions - setupSurpriseSection artık HTML'de statik
 function updateLoveCounter() {
     const startDate = new Date('2024-12-07');
     const today = new Date();
@@ -696,117 +800,427 @@ function updateLoveCounter() {
 }
 
 function updateDailyMessage() {
-    const messages = [
-        // Ocak (31 gün)
-        "Sen benim hayatımın en güzel hediyesisin 💕", "Gülüşün benim en sevdiğim müzik 🎵", "Seninle geçen her an değerli ⭐", "Sen benim dünyamın merkezi 🌍", "Sevgin beni daha iyi bir insan yapıyor 💖",
-        "Sen olmadan hiçbir şey tamamlanmış gibi gelmiyor 🌙", "Seninle her gün yeni bir macera ✨", "Gözlerin benim için en güzel manzara 👀", "Seninle olmak benim en büyük mutluluğum 😊", "Sen benim kalbimin sahibisin 💝",
-        "Her sabah seni düşünerek uyanıyorum ☀️", "Sen benim hayallerimin gerçeği 🌈", "Seninle geçen zaman hiç yetmiyor ⏰", "Sen benim için mükemmelsin 🌟", "Sevgin hayatıma anlam katıyor 📖",
-        "Sen benim en güzel sırrım 🤫", "Seninle her şey daha güzel 🌺", "Sen benim kalbimin melodisi 🎶", "Seninle olmak benim süper gücüm 💪", "Sen benim hayatımın rengi 🎨",
-        "Seninle geçen her gün bayram 🎉", "Sen benim ruhuma dokunuyorsun 👻", "Seninle her şey mümkün görünüyor 🚀", "Sen benim için bir mucize 🌠", "Sevgin beni güçlendiriyor 💪",
-        "Sen benim hayatımın şarkısı 🎵", "Seninle olmak benim en büyük şansım 🍀", "Sen benim kalbimin anahtarı 🗝️", "Seninle her an özel 💎", "Sen benim sonsuzluğum ♾️", "Sevgin benim için her şey 🌍",
-        
-        // Şubat (29 gün - artık yıl)
-        "Sen benim kalbimin kraliçesi 👑", "Seninle aşkı öğrendim 📚", "Sen benim hayatımın güneşi ☀️", "Seninle her gün Sevgililer Günü 💕", "Sen benim rüyalarımın gerçeği 💭",
-        "Seninle olmak benim cennetim 😇", "Sen benim kalbimin sesi 🔊", "Seninle her şey daha anlamlı 💫", "Sen benim için bir hediye 🎁", "Sevgin beni tamamlıyor 🧩",
-        "Sen benim hayatımın yıldızı ⭐", "Seninle geçen zaman altın değerinde 🏆", "Sen benim kalbimin sakinliği 🕊️", "Seninle her gün öğreniyorum 📖", "Sen benim için bir bereket 🙏",
-        "Seninle olmak benim gücüm 💪", "Sen benim hayatımın çiçeği 🌸", "Seninle her an büyülü ✨", "Sen benim kalbimin huzuru 😌", "Sevgin beni iyileştiriyor 💊",
-        "Sen benim hayatımın dansı 💃", "Seninle her şey güzel 🌺", "Sen benim kalbimin şiiri 📝", "Seninle olmak benim mutluluğum 😄", "Sen benim sonsuz sevgim 💞",
-        "Seninle geçen her gün özel 🌟", "Sen benim hayatımın müziği 🎼", "Seninle her an değerli 💎", "Sen benim kalbimin sahibi 👸",
-        
-        // Mart (31 gün)
-        "Bahar geldi, sen zaten hep kalbimdesin 🌷", "Sen benim hayatımın baharı 🌸", "Seninle her gün yeniden doğuyorum 🌱", "Sen benim kalbimin çiçeği 🌺", "Seninle hayat daha renkli 🌈",
-        "Sen benim için bir mucize 🌟", "Seninle geçen her an harika 😍", "Sen benim hayatımın ışığı 💡", "Seninle olmak benim şansım 🍀", "Sen benim kalbimin huzuru 🕊️",
-        "Seninle her gün öğreniyorum 📚", "Sen benim hayatımın melodisi 🎵", "Seninle geçen zaman çok hızlı ⚡", "Sen benim kalbimin anahtarı 🔑", "Seninle her şey mümkün 🚀",
-        "Sen benim hayatımın güzelliği 🌹", "Seninle olmak benim mutluluğum 😊", "Sen benim kalbimin şarkısı 🎶", "Seninle her an özel 💫", "Sen benim sonsuzluğum ♾️",
-        "Seninle geçen her gün bereket 🙏", "Sen benim hayatımın dansı 💃", "Seninle her şey güzel 🌺", "Sen benim kalbimin kraliçesi 👑", "Seninle olmak benim gücüm 💪",
-        "Sen benim hayatımın yıldızı ⭐", "Seninle her gün bayram 🎉", "Sen benim kalbimin sesi 🔊", "Seninle geçen zaman altın 🏆", "Sen benim için her şey 🌍", "Sevgin beni tamamlıyor 💝",
-        
-        // Nisan (30 gün)
-        "Nisan yağmurları gibi sen de hayatıma bereket getirdin 🌧️", "Sen benim bahar temizliğimsin, kalbimi arındırıyorsun 🧹", "Seninle her gün 1 Nisan şakası gibi güzel sürprizlerle dolu 😄", "Sen benim hayatımın en güzel mevsimi 🌸", "Seninle geçen her gün yeniden doğuş 🐣",
-        "Sen benim kalbimin bahçıvanı 👩‍🌾", "Seninle her şey yeşeriyor 🌿", "Sen benim hayatımın çiçek açması 🌺", "Seninle olmak benim baharım 🌷", "Sen benim kalbimin güneşi ☀️",
-        "Seninle geçen her an taze 🍃", "Sen benim hayatımın yağmuru 🌦️", "Seninle her gün büyüyorum 🌱", "Sen benim kalbimin tohumları 🌰", "Seninle olmak benim çiçeklenmem 🌼",
-        "Sen benim hayatımın arısı 🐝", "Seninle her şey bal oluyor 🍯", "Sen benim kalbimin kelebeği 🦋", "Seninle geçen zaman uçuyor ⏰", "Sen benim sonsuz baharım 🌸",
-        "Seninle her gün yeni yapraklar 🍀", "Sen benim hayatımın ağacı 🌳", "Seninle olmak benim köküm 🌿", "Sen benim kalbimin meyvesi 🍎", "Seninle her an tatlı 🍓",
-        "Sen benim hayatımın bahçesi 🏡", "Seninle geçen her gün hasat 🌾", "Sen benim kalbimin çiftçisi 👨‍🌾", "Seninle olmak benim bereketim 🙏", "Sen benim sonsuz hasadım 🌽",
-        
-        // Mayıs (31 gün) - Anneler günü temalı
-        "Mayıs ayında anneler kutlanır, sen de benim kalbimin annesi gibisin 👩‍👧", "Sen benim hayatımın en güzel hediyesi 🎁", "Seninle geçen her gün kutlama 🎉", "Sen benim kalbimin koruyucusu 🛡️", "Seninle olmak benim güvenli limanum ⚓",
-        "Sen benim hayatımın şefkati 🤗", "Seninle her şey daha sıcak 🔥", "Sen benim kalbimin sıcaklığı 🌡️", "Seninle geçen zaman iyileştirici 💊", "Sen benim sonsuz şefkatim 💕",
-        "Seninle her gün büyüyorum 📈", "Sen benim hayatımın öğretmeni 👩‍🏫", "Seninle olmak benim dersim 📚", "Sen benim kalbimin bilgisi 🧠", "Seninle her an öğretici ✏️",
-        "Sen benim hayatımın rehberi 🧭", "Seninle geçen yol daha kolay 🛤️", "Sen benim kalbimin pusulası 🧭", "Seninle olmak benim yönüm 📍", "Sen benim sonsuz rehberim 🗺️",
-        "Seninle her gün keşif 🔍", "Sen benim hayatımın maceracısı 🏃‍♀️", "Seninle olmak benim serüvenim 🎢", "Sen benim kalbimin cesurluğu 🦁", "Seninle her an heyecan 🎊",
-        "Sen benim hayatımın kahramanı 🦸‍♀️", "Seninle geçen her gün zafer 🏆", "Sen benim kalbimin gücü 💪", "Seninle olmak benim zaferin 🥇", "Sen benim sonsuz kahramanım 👑", "Mayıs çiçekleri gibi güzelsin 🌺",
-        
-        // Haziran (30 gün) - Yaz başlangıcı
-        "Haziran güneşi gibi sen de hayatımı aydınlatıyorsun ☀️", "Sen benim yaz tatilim, seninle her gün tatil 🏖️", "Seninle geçen her gün sıcak 🌡️", "Sen benim hayatımın güneşi ☀️", "Seninle olmak benim yazım 🌞",
-        "Sen benim kalbimin plajı 🏖️", "Seninle her şey daha parlak ✨", "Sen benim hayatımın ışığı 💡", "Seninle geçen zaman altın ⭐", "Sen benim sonsuz yazım 🌅",
-        "Seninle her gün piknik 🧺", "Sen benim hayatımın doğası 🌳", "Seninle olmak benim özgürlüğüm 🕊️", "Sen benim kalbimin kuşu 🐦", "Seninle her an uçuyorum ✈️",
-        "Sen benim hayatımın denizi 🌊", "Seninle geçen her dalga güzel 🌊", "Sen benim kalbimin sahili 🏖️", "Seninle olmak benim yüzüşüm 🏊‍♀️", "Sen benim sonsuz okyanusım 🌊",
-        "Seninle her gün festival 🎪", "Sen benim hayatımın müziği 🎵", "Seninle olmak benim dansım 💃", "Sen benim kalbimin ritmi 🥁", "Seninle her an melodi 🎶",
-        "Sen benim hayatımın yıldızı ⭐", "Seninle geçen geceler güzel 🌙", "Sen benim kalbimin ayı 🌙", "Seninle olmak benim rüyam 💭", "Sen benim sonsuz gecelerim 🌌",
-        
-        // Temmuz (31 gün) - Yaz ortası
-        "Temmuz sıcağı gibi sen de kalbimi ısıtıyorsun 🔥", "Sen benim yaz aşkım 💕", "Seninle geçen her gün sıcacık 🌡️", "Sen benim hayatımın ateşi 🔥", "Seninle olmak benim tutkum ❤️‍🔥",
-        "Sen benim kalbimin güneş kremi, beni koruyorsun ☀️", "Seninle her şey daha canlı 🌈", "Sen benim hayatımın rengi 🎨", "Seninle geçen zaman renkli 🌈", "Sen benim sonsuz rengim 🎭",
-        "Seninle her gün macera 🏄‍♀️", "Sen benim hayatımın sörfü 🏄‍♀️", "Seninle olmak benim dalgam 🌊", "Sen benim kalbimin rüzgarı 💨", "Seninle her an esiyorum 🍃",
-        "Sen benim hayatımın kampı ⛺", "Seninle geçen geceler yıldızlı ⭐", "Sen benim kalbimin ateş böceği ✨", "Seninle olmak benim ışığım 💡", "Sen benim sonsuz ışığım 🔦",
-        "Seninle her gün barbekü 🍖", "Sen benim hayatımın lezzeti 😋", "Seninle olmak benim tadım 👅", "Sen benim kalbimin baharatı 🌶️", "Seninle her an lezzetli 🍯",
-        "Sen benim hayatımın dondurması 🍦", "Seninle geçen yaz serinletici ❄️", "Sen benim kalbimin serinliği 🧊", "Seninle olmak benim ferahlığım 💨", "Sen benim sonsuz serinliğim 🌬️", "Temmuz sonu, ama sevgim sonsuz 💞",
-        
-        // Ağustos (31 gün) - Yaz sonu
-        "Ağustos sıcağında bile sen benim serinliğimsin 🌬️", "Sen benim yaz anılarım 📸", "Seninle geçen her gün unutulmaz 💭", "Sen benim hayatımın albümü 📷", "Seninle olmak benim fotoğrafım 🖼️",
-        "Sen benim kalbimin tatili 🏝️", "Seninle her şey daha huzurlu 😌", "Sen benim hayatımın dinlendirici 🛋️", "Seninle geçen zaman rahatlatıcı 💆‍♀️", "Sen benim sonsuz huzurum 🕊️",
-        "Seninle her gün festival 🎭", "Sen benim hayatımın sanatı 🎨", "Seninle olmak benim yaratıcılığım ✨", "Sen benim kalbimin ilhamı 💡", "Seninle her an sanatsal 🖌️",
-        "Sen benim hayatımın şarkısı 🎵", "Seninle geçen her nota güzel 🎶", "Sen benim kalbimin bestesi 🎼", "Seninle olmak benim müziğim 🎹", "Sen benim sonsuz melodim 🎺",
-        "Seninle her gün keşif 🔭", "Sen benim hayatımın yıldızı ⭐", "Seninle olmak benim galaksim 🌌", "Sen benim kalbimin gezegeni 🪐", "Seninle her an uzayda 🚀",
-        "Sen benim hayatımın hazinesi 💎", "Seninle geçen her gün değerli 💰", "Sen benim kalbimin mücevheri 💍", "Seninle olmak benim zenginliğim 👑", "Sen benim sonsuz hazinemsin 🏆", "Ağustos biterken sevgim artıyor 📈",
-        
-        // Eylül (30 gün) - Sonbahar başlangıcı
-        "Eylül geldi, yapraklar dökülür ama sevgim hiç azalmaz 🍂", "Sen benim sonbahar güzelliğimsin 🍁", "Seninle geçen her gün altın sarısı 🟡", "Sen benim hayatımın hasadı 🌾", "Seninle olmak benim bereketim 🙏",
-        "Sen benim kalbimin mevsimi 🍂", "Seninle her şey daha olgun 🍇", "Sen benim hayatımın üzümü 🍇", "Seninle geçen zaman şarap gibi 🍷", "Sen benim sonsuz bağım 🍇",
-        "Seninle her gün okul 🏫", "Sen benim hayatımın dersi 📚", "Seninle olmak benim öğrenimim 🎓", "Sen benim kalbimin öğretmeni 👩‍🏫", "Seninle her an eğitici 📖",
-        "Sen benim hayatımın kitabı 📕", "Seninle geçen her sayfa güzel 📄", "Sen benim kalbimin hikayesi 📖", "Seninle olmak benim romanım 💕", "Sen benim sonsuz kitabım 📚",
-        "Seninle her gün yürüyüş 🚶‍♀️", "Sen benim hayatımın yolu 🛤️", "Seninle olmak benim adımım 👣", "Sen benim kalbimin patikası 🥾", "Seninle her an yolculuk 🗺️",
-        "Sen benim hayatımın kahvesi ☕", "Seninle geçen sabahlar güzel 🌅", "Sen benim kalbimin uyanışı ⏰", "Seninle olmak benim enerjim ⚡", "Sen benim sonsuz kahvem ☕",
-        
-        // Ekim (31 gün) - Sonbahar ortası
-        "Ekim yaprakları gibi sen de hayatıma renk katıyorsun 🍁", "Sen benim Halloween kostümüm, seninle her gün maskeradam 🎭", "Seninle geçen her gün şeker bayramı 🍬", "Sen benim hayatımın bal kabağı 🎃", "Seninle olmak benim kutlamam 🎉",
-        "Sen benim kalbimin cadısı 🧙‍♀️", "Seninle her şey büyülü ✨", "Sen benim hayatımın sihri 🪄", "Seninle geçen zaman büyü gibi 🔮", "Sen benim sonsuz büyüm 🌟",
-        "Seninle her gün hasat 🌾", "Sen benim hayatımın ürünü 🍎", "Seninle olmak benim mahsulüm 🥕", "Sen benim kalbimin bahçıvanı 👨‍🌾", "Seninle her an verimli 🌱",
-        "Sen benim hayatımın şarabı 🍷", "Seninle geçen yıllar olgunlaşıyor 🧀", "Sen benim kalbimin mahzeni 🏺", "Seninle olmak benim tadımım 🍯", "Sen benim sonsuz şarabım 🍇",
-        "Seninle her gün festival 🎪", "Sen benim hayatımın karnavalı 🎭", "Seninle olmak benim gösterim 🎬", "Sen benim kalbimin sahnesi 🎭", "Seninle her an performans 🎪",
-        "Sen benim hayatımın ateşi 🔥", "Seninle geçen geceler sıcak 🔥", "Sen benim kalbimin şöminesi 🔥", "Seninle olmak benim ısınmam 🧥", "Sen benim sonsuz sıcaklığım 🌡️", "Ekim sonu, sevgim dorukta 📈",
-        
-        // Kasım (30 gün) - Sonbahar sonu
-        "Kasım soğuğunda sen benim sıcaklığımsın 🧥", "Sen benim şükran günümüsün, her gün sana şükrediyorum 🙏", "Seninle geçen her gün bereket 🦃", "Sen benim hayatımın nimetimsin 🍯", "Seninle olmak benim şükrüm 🙏",
-        "Sen benim kalbimin ateşi 🔥", "Seninle her şey daha sıcak 🌡️", "Sen benim hayatımın sobası 🔥", "Seninle geçen kış hazırlığı 🧥", "Sen benim sonsuz sıcaklığım ☀️",
-        "Seninle her gün kitap 📚", "Sen benim hayatımın kütüphanesi 📖", "Seninle olmak benim okumam 👓", "Sen benim kalbimin yazarı ✍️", "Seninle her an hikaye 📝",
-        "Sen benim hayatımın çayı 🍵", "Seninle geçen akşamlar huzurlu 🌆", "Sen benim kalbimin demliği 🫖", "Seninle olmak benim içimem ☕", "Sen benim sonsuz çayım 🍃",
-        "Seninle her gün film 🎬", "Sen benim hayatımın sineması 🎭", "Seninle olmak benim filmim 📽️", "Sen benim kalbimin yönetmeni 🎬", "Seninle her an sinema 🍿",
-        "Sen benim hayatımın battaniyesi 🛏️", "Seninle geçen geceler rahat 😴", "Sen benim kalbimin yastığı 🛌", "Seninle olmak benim uykum 💤", "Sen benim sonsuz rahatlığım 😌",
-        
-        // Aralık (31 gün) - Kış ve yılbaşı
-        "Aralık karları gibi sen de hayatımı beyaza boyuyorsun ❄️", "Sen benim Noel hediyemsin 🎁", "Seninle geçen her gün kutlama 🎄", "Sen benim hayatımın yıldızısın ⭐", "Seninle olmak benim mucizem ✨",
-        "Sen benim kalbimin karı ❄️", "Seninle her şey daha temiz 🤍", "Sen benim hayatımın saflığı 🕊️", "Seninle geçen kış güzel ⛄", "Sen benim sonsuz karım ❄️",
-        "Seninle her gün hediye 🎁", "Sen benim hayatımın sürprizi 🎉", "Seninle olmak benim armağanım 💝", "Sen benim kalbimin paketi 📦", "Seninle her an hediye 🎀",
-        "Sen benim hayatımın ışığı 💡", "Seninle geçen geceler aydınlık ✨", "Sen benim kalbimin mumu 🕯️", "Seninle olmak benim parlaklığım 💎", "Sen benim sonsuz ışığım 🌟",
-        "Seninle her gün yılbaşı 🎊", "Sen benim hayatımın kutlaması 🎉", "Seninle olmak benim partim 🥳", "Sen benim kalbimin konfetisi 🎊", "Seninle her an festival 🎭",
-        "Sen benim hayatımın kararı 📝", "Seninle geçen yıl mükemmeldi 📅", "Sen benim kalbimin planı 📋", "Seninle olmak benim geleceğim 🔮", "Sen benim sonsuz yıllarım 📆",
-        "Yıl bitiyor ama sevgim hiç bitmiyor 💞", "Sen benim hayatımın sonu ve başlangıcı 🔄", "Seninle her yıl daha güzel 📈", "Sen benim kalbimin takvimi 📅", "Seninle olmak benim sonsuzluğum ♾️"
-    ];
-    
-    // Yılın gününü hesapla (0-364)
     const today = new Date();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+
+    // Özel günler - ay/gün bazlı
+    const special = {
+        "1/1":   "Yeni yıl, yeni başlangıçlar. Seninle geçireceğim bu yıla çok şey bekliyorum.",
+        "2/14":  "Sevgililer Günü bugün ama ben her gün seni düşünüyorum zaten.",
+        "3/8":   "Bugün Dünya Kadınlar Günü. Güçlü, zeki ve güzel olduğun için şanslıyım.",
+        "3/20":  "Bahar bugün başlıyor. Seninle her mevsim güzel ama bahar biraz daha özel.",
+        "4/23":  "Bugün çocukların günü. Seninle bazen çocuklar gibi gülüp eğleniyoruz, bu çok güzel.",
+        "5/1":   "1 Mayıs. Bugün dinlen, hak ettin.",
+        "5/19":  "Bugün gençlik ve spor günü. Seninle her gün enerjik hissediyorum.",
+        "6/21":  "Yaz bugün başlıyor. Seninle geçirecek planlar yapmak istiyorum.",
+        "7/4":   "Yaz ortası. Seninle bir yerlere gitmek, bir şeyler keşfetmek istiyorum.",
+        "8/30":  "Bugün Zafer Bayramı. Seninle olmak da benim için bir zafer gibi hissettiriyor.",
+        "9/22":  "Sonbahar başlıyor. Yapraklar dökülüyor ama seninle her şey yerli yerinde.",
+        "10/29": "Cumhuriyet Bayramı. Bugün özel bir gün, seninle kutlamak güzel olurdu.",
+        "11/10": "Bugün Atatürk'ü anıyoruz. Saygıyla.",
+        "12/7":  "Bugün bizim için özel bir gün. Bir yıl önce başladı her şey.",
+        "12/21": "Kış bugün başlıyor. Seninle sıcak bir yerde olmak istiyorum.",
+        "12/24": "Yılbaşı arifesi. Bu yılı seninle geçirdiğim için mutluyum.",
+        "12/31": "Yılın son günü. Seninle geçen bu yıl için teşekkür ederim."
+    };
+
+    const key = `${month}/${day}`;
+    if (special[key]) {
+        const el = document.getElementById('dailyMessage');
+        if (el) el.textContent = special[key];
+        return;
+    }
+
+    // Günlük mesajlar - 365 gün için
+    const messages = [
+        // Ocak
+        "Bugün nasılsın? Umarım güzel bir gün geçiriyorsundur.",
+        "Seninle konuşmak her zaman iyi geliyor.",
+        "Bugün aklıma geldin, iyi misin?",
+        "Küçük şeyler bazen en güzel olanlar.",
+        "Seninle geçen zamanı seviyorum.",
+        "Bugün bir şey güldürdü mü seni?",
+        "Umarım bugün her şey yolunda gider.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün kendine iyi bak.",
+        "Birlikte güldüğümüz anları özlüyorum.",
+        "Seninle her şey biraz daha kolay.",
+        "Bugün nasıl geçti?",
+        "Seninle vakit geçirmek istiyorum.",
+        "Küçük bir mesaj, büyük bir his.",
+        "Umarım bugün güzel bir şey olmuştur.",
+        "Seninle olmak güzel.",
+        "Bugün seni düşündüm.",
+        "Her şey yolunda mı?",
+        "Seninle gülmek en sevdiğim şeylerden.",
+        "Bugün kendine nazik ol.",
+        "Seninle geçen her an değerli.",
+        "Umarım bugün enerjin yerindedir.",
+        "Seninle konuşmak istiyorum.",
+        "Bugün güzel bir şey fark ettin mi?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün güldün.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle olmak güzel bir his.",
+        // Şubat
+        "Bugün soğuk ama seninle sıcak.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle konuşmak her zaman iyi.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün nasılsın?",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha kolay.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak rahatlatıcı.",
+        // Mart
+        "Bahar geliyor, seninle güzel olacak.",
+        "Bugün nasılsın?",
+        "Seninle konuşmak iyi geliyor.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak güzel.",
+        "Bugün güzel bir şey fark ettin mi?",
+        "Seninle her şey daha kolay.",
+        // Nisan
+        "Nisan yağmurları güzel, seninle daha da güzel.",
+        "Bugün nasılsın?",
+        "Seninle konuşmak iyi geliyor.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak güzel.",
+        "Bugün güzel bir şey fark ettin mi?",
+        // Mayıs
+        "Mayıs güzel, seninle daha da güzel.",
+        "Bugün nasılsın?",
+        "Seninle konuşmak iyi geliyor.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak güzel.",
+        "Bugün güzel bir şey fark ettin mi?",
+        "Seninle her şey daha kolay.",
+        // Haziran
+        "Yaz geliyor, seninle güzel olacak.",
+        "Bugün nasılsın?",
+        "Seninle konuşmak iyi geliyor.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak güzel.",
+        "Bugün güzel bir şey fark ettin mi?",
+        // Temmuz
+        "Yaz ortası, seninle her şey daha güzel.",
+        "Bugün nasılsın?",
+        "Seninle konuşmak iyi geliyor.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak güzel.",
+        "Bugün güzel bir şey fark ettin mi?",
+        "Seninle her şey daha kolay.",
+        // Ağustos
+        "Yaz bitmeden seninle güzel anlar yaşayalım.",
+        "Bugün nasılsın?",
+        "Seninle konuşmak iyi geliyor.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak güzel.",
+        "Bugün güzel bir şey fark ettin mi?",
+        "Seninle her şey daha kolay.",
+        // Eylül
+        "Sonbahar geliyor, seninle her mevsim güzel.",
+        "Bugün nasılsın?",
+        "Seninle konuşmak iyi geliyor.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak güzel.",
+        "Bugün güzel bir şey fark ettin mi?",
+        // Ekim
+        "Sonbahar ortası, yapraklar dökülüyor ama seninle her şey yerli yerinde.",
+        "Bugün nasılsın?",
+        "Seninle konuşmak iyi geliyor.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak güzel.",
+        "Bugün güzel bir şey fark ettin mi?",
+        "Seninle her şey daha kolay.",
+        // Kasım
+        "Kasım soğuğu var ama seninle sıcak.",
+        "Bugün nasılsın?",
+        "Seninle konuşmak iyi geliyor.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak güzel.",
+        "Bugün güzel bir şey fark ettin mi?",
+        // Aralık
+        "Aralık geldi, yıl bitmek üzere. Seninle güzel geçti.",
+        "Bugün nasılsın?",
+        "Seninle konuşmak iyi geliyor.",
+        "Umarım bugün güzel geçiyor.",
+        "Seninle olmak güzel.",
+        "Bugün kendine iyi bak.",
+        "Seninle gülmek güzel.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün güzel bir şey olsun.",
+        "Seninle her şey daha anlamlı.",
+        "Umarım bugün iyi geçiyor.",
+        "Seninle olmak rahatlatıcı.",
+        "Bugün seni düşündüm.",
+        "Seninle konuşmak istiyorum.",
+        "Umarım bugün güldün.",
+        "Seninle geçen zaman değerli.",
+        "Bugün nasıl hissediyorsun?",
+        "Seninle olmak huzur veriyor.",
+        "Bugün iyi şeyler olsun.",
+        "Seninle her an özel.",
+        "Umarım bugün güzel geçti.",
+        "Seninle olmak güzel bir his.",
+        "Bugün kendine nazik ol.",
+        "Seninle gülmek en güzel şey.",
+        "Umarım bugün enerjin yerinde.",
+        "Seninle vakit geçirmek istiyorum.",
+        "Bugün nasılsın?",
+        "Seninle olmak güzel.",
+        "Bugün güzel bir şey fark ettin mi?",
+        "Seninle her şey daha kolay."
+    ];
+
     const start = new Date(today.getFullYear(), 0, 0);
     const diff = today - start;
     const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24)) - 1;
-    
-    const messageElement = document.getElementById('dailyMessage');
-    if (messageElement) {
-        messageElement.textContent = messages[dayOfYear % messages.length];
-    }
-}
 
+    const el = document.getElementById('dailyMessage');
+    if (el) el.textContent = messages[dayOfYear % messages.length];
+}
 function startHeartRain() {
     const hearts = ['💕', '💖', '💗', '💝', '💞', '❤️', '💙', '💜'];
     
@@ -853,100 +1267,63 @@ Seni seviyorum Pelin 💕`;
     alert(poem);
 }
 
-// New section functions
-function openMemorySection() {
-    // Önce varsa eski modalı kapat
-    closeSectionModal();
-    
-    // Anı kutusu bölümü - ayrı sayfa gibi
-    const modal = document.createElement('div');
-    modal.className = 'section-modal';
-    modal.innerHTML = `
-        <div class="section-content">
-            <div class="section-header">
-                <h2>📸 Anı Kutusu</h2>
-                <button class="close-section-btn" onclick="closeSectionModal()">&times;</button>
-            </div>
-            <div class="section-body">
-                <div class="memory-upload">
-                    <button class="add-btn" onclick="addMemory()">📷 Anı Ekle</button>
-                </div>
-                <div class="memories-grid" id="memoriesGrid">
-                    <!-- Anılar buraya gelecek -->
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    loadMemories();
-}
-
-function openPoemSection() {
-    // Önce varsa eski modalı kapat
-    closeSectionModal();
-    
-    // Şiir bölümü
-    const modal = document.createElement('div');
-    modal.className = 'section-modal';
-    modal.innerHTML = `
-        <div class="section-content">
-            <div class="section-header">
-                <h2>📝 Sevgi Şiirleri</h2>
-                <button class="close-section-btn" onclick="closeSectionModal()">&times;</button>
-            </div>
-            <div class="section-body">
-                ${currentUser === 'emir' ? `
-                    <div class="poem-editor">
-                        <textarea id="poemInput" placeholder="Pelin için bir şiir yaz..."></textarea>
-                        <button class="add-btn" onclick="savePoem()">💕 Şiiri Kaydet</button>
-                    </div>
-                ` : `
-                    <div class="poem-info-text">
-                        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
-                            💕 Emir'in sana yazdığı özel şiirler
-                        </p>
-                    </div>
-                `}
-                <div class="poems-list" id="poemsList">
-                    <!-- Şiirler buraya gelecek -->
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    loadPoems();
-}
-
-function openSpecialDatesSection() {
-    // Önce varsa eski modalı kapat
-    closeSectionModal();
-    
-    // Özel günler takvimi
-    const modal = document.createElement('div');
-    modal.className = 'section-modal';
-    modal.innerHTML = `
-        <div class="section-content">
-            <div class="section-header">
-                <h2>📅 Özel Günler Takvimi</h2>
-                <button class="close-section-btn" onclick="closeSectionModal()">&times;</button>
-            </div>
-            <div class="section-body">
-                <div class="calendar-controls">
-                    <button class="add-btn" onclick="addSpecialDate()">➕ Özel Gün Ekle</button>
-                </div>
-                <div class="calendar-view" id="calendarView">
-                    <!-- Takvim buraya gelecek -->
-                </div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    loadSpecialDates();
+// Tam ekran sayfa açma sistemi
+function openFullPage(title, contentFn) {
+    const page = document.getElementById('fullPage');
+    const titleEl = document.getElementById('fullPageTitle');
+    const body = document.getElementById('fullPageBody');
+    if (!page) return;
+    titleEl.textContent = title;
+    body.innerHTML = '';
+    page.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    contentFn(body);
 }
 
 function closeSectionModal() {
-    const modals = document.querySelectorAll('.section-modal');
-    modals.forEach(modal => modal.remove());
+    const page = document.getElementById('fullPage');
+    if (page) page.classList.add('hidden');
+    document.body.style.overflow = '';
+    document.querySelectorAll('.section-modal').forEach(m => m.remove());
+}
+
+function openMemorySection() {
+    openFullPage('📸 Anılar', (body) => {
+        body.innerHTML = `
+            <div class="memory-upload" style="margin-bottom:1rem;">
+                <button class="add-btn" onclick="addMemory()">📷 Anı Ekle</button>
+            </div>
+            <div class="memories-grid" id="memoriesGrid"></div>
+        `;
+        loadMemories();
+    });
+}
+
+function openPoemSection() {
+    openFullPage('📝 Şiirler', (body) => {
+        body.innerHTML = `
+            ${currentUser === 'emir' ? `
+                <div class="poem-editor">
+                    <textarea id="poemInput" placeholder="Bir şiir yaz..."></textarea>
+                    <button class="add-btn" onclick="savePoem()" style="width:100%;margin-top:0.5rem;">Kaydet</button>
+                </div>
+            ` : `<p style="text-align:center;color:var(--text-secondary);margin-bottom:1.5rem;">Emir'in yazdığı şiirler</p>`}
+            <div class="poems-list" id="poemsList"></div>
+        `;
+        loadPoems();
+    });
+}
+
+function openSpecialDatesSection() {
+    openFullPage('📅 Özel Günler', (body) => {
+        body.innerHTML = `
+            <div style="margin-bottom:1rem;">
+                <button class="add-btn" onclick="addSpecialDate()">➕ Özel Gün Ekle</button>
+            </div>
+            <div class="calendar-view" id="calendarView"></div>
+        `;
+        loadSpecialDates();
+    });
 }
 
 // Data management for new sections
@@ -1050,13 +1427,15 @@ function openGallery(index) {
     const photos = surpriseData.memories.filter(m => m.photo);
     if (photos.length === 0) return;
 
-    // Tıklanan fotoğrafın photos array'indeki indexini bul
     const clickedMemory = surpriseData.memories[index];
     galleryIndex = photos.findIndex(m => m.id === clickedMemory.id);
     if (galleryIndex === -1) galleryIndex = 0;
 
     const old = document.getElementById('galleryOverlay');
     if (old) old.remove();
+
+    // Scroll'u kilitle
+    document.body.style.overflow = 'hidden';
 
     const overlay = document.createElement('div');
     overlay.id = 'galleryOverlay';
@@ -1078,15 +1457,13 @@ function openGallery(index) {
     document.body.appendChild(overlay);
     updateGalleryDots(photos);
 
-    // Swipe desteği
     let touchStartX = 0;
-    overlay.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+    overlay.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
     overlay.addEventListener('touchend', e => {
         const diff = touchStartX - e.changedTouches[0].clientX;
         if (Math.abs(diff) > 50) galleryNav(diff > 0 ? 1 : -1);
     });
 
-    // Klavye desteği
     document.addEventListener('keydown', galleryKeyHandler);
 }
 
@@ -1117,6 +1494,7 @@ function updateGalleryDots(photos) {
 function closeGallery() {
     const overlay = document.getElementById('galleryOverlay');
     if (overlay) overlay.remove();
+    document.body.style.overflow = '';
     document.removeEventListener('keydown', galleryKeyHandler);
 }
 
@@ -1698,18 +2076,48 @@ function updateStats() {
     document.getElementById('musicCount').textContent = appData.music.length;
     document.getElementById('dreamCount').textContent = appData.dreams.length;
     document.getElementById('noteCount').textContent = appData.notes.length;
-    updateDaysCounter();
+    startLiveCounter();
+    updateDailyMessage();
 }
 
-// Gün sayacı - 07.12.2024'ten itibaren
-function updateDaysCounter() {
-    const el = document.getElementById('daysTogether');
-    if (!el) return;
-    const start = new Date('2024-12-07');
-    const today = new Date();
-    const days = Math.floor((today - start) / (1000 * 60 * 60 * 24));
-    el.textContent = days;
+// Canlı sayaç - 07.12.2024'ten itibaren gerçek zamanlı
+let liveCounterInterval = null;
+
+function startLiveCounter() {
+    function update() {
+        const start = new Date('2024-12-07T00:00:00');
+        const now = new Date();
+        const diff = now - start;
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        const dEl = document.getElementById('counterDays');
+        const hEl = document.getElementById('counterHours');
+        const mEl = document.getElementById('counterMinutes');
+        const sEl = document.getElementById('counterSeconds');
+
+        if (dEl) dEl.textContent = days;
+        if (hEl) hEl.textContent = String(hours).padStart(2, '0');
+        if (mEl) mEl.textContent = String(minutes).padStart(2, '0');
+        if (sEl) {
+            const newVal = String(seconds).padStart(2, '0');
+            if (sEl.textContent !== newVal) {
+                sEl.classList.add('tick');
+                sEl.textContent = newVal;
+                setTimeout(() => sEl.classList.remove('tick'), 300);
+            }
+        }
+    }
+    update();
+    if (liveCounterInterval) clearInterval(liveCounterInterval);
+    liveCounterInterval = setInterval(update, 1000);
 }
+
+// Eski fonksiyon - geriye dönük uyumluluk
+function updateDaysCounter() { startLiveCounter(); }
 
 // Modal Management
 function openModal(type) {

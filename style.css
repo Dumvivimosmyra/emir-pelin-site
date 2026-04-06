@@ -5,88 +5,74 @@
     box-sizing: border-box;
 }
 
-:root {
-    --bg-primary: #f8fafc;
+/* ===== TEMA DEĞİŞKENLERİ ===== */
+
+/* 🌸 Sakura (varsayılan) - Açık pembe/krem */
+:root, [data-theme="sakura"] {
+    --bg-primary: #fdf6f8;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #f1f5f9;
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --border-color: #e2e8f0;
-    --accent-color: #667eea;
-    --accent-hover: #5a67d8;
-    --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --shadow: 0 2px 8px rgba(0,0,0,0.06);
-    --shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
+    --bg-tertiary: #fce8ef;
+    --text-primary: #2d1a22;
+    --text-secondary: #7a4a5e;
+    --border-color: #f0c8d8;
+    --accent-color: #c45c82;
+    --accent-hover: #a84a6e;
+    --accent-gradient: linear-gradient(135deg, #e8829e 0%, #c45c82 100%);
+    --shadow: 0 2px 8px rgba(196,92,130,0.08);
+    --shadow-hover: 0 6px 20px rgba(196,92,130,0.16);
+    --login-bg: linear-gradient(135deg, #e8829e 0%, #c45c82 100%);
+    --particle-color: rgba(196,92,130,0.5);
 }
 
-[data-theme="dark"] {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --border-color: #475569;
-    --accent-color: #818cf8;
-    --accent-hover: #6366f1;
-    --accent-gradient: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
-    --shadow: 0 2px 8px rgba(0,0,0,0.3);
-    --shadow-hover: 0 6px 20px rgba(0,0,0,0.4);
+/* 🌿 Forest - Koyu yeşil */
+[data-theme="forest"] {
+    --bg-primary: #111a12;
+    --bg-secondary: #192b1a;
+    --bg-tertiary: #1f3620;
+    --text-primary: #e8f5e9;
+    --text-secondary: #a5c8a8;
+    --border-color: #2e5230;
+    --accent-color: #5cb870;
+    --accent-hover: #4aa05c;
+    --accent-gradient: linear-gradient(135deg, #2e5230 0%, #5cb870 100%);
+    --shadow: 0 2px 8px rgba(0,0,0,0.4);
+    --shadow-hover: 0 6px 20px rgba(0,0,0,0.5);
+    --login-bg: linear-gradient(135deg, #111a12 0%, #2e5230 100%);
+    --particle-color: rgba(92,184,112,0.4);
 }
 
-[data-theme="navy"] {
-    --bg-primary: #0d1b2a;
-    --bg-secondary: #1b2838;
-    --bg-tertiary: #243447;
-    --text-primary: #e2e8f0;
-    --text-secondary: #94a3b8;
-    --border-color: #2d4a6b;
-    --accent-color: #3b82f6;
-    --accent-hover: #2563eb;
-    --accent-gradient: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
-    --shadow: 0 2px 8px rgba(0,0,0,0.3);
-    --shadow-hover: 0 6px 20px rgba(0,0,0,0.4);
+/* 🌌 Cosmos - Lacivert/Mor */
+[data-theme="cosmos"] {
+    --bg-primary: #07071c;
+    --bg-secondary: #0e0e2e;
+    --bg-tertiary: #151540;
+    --text-primary: #eeeeff;
+    --text-secondary: #9898cc;
+    --border-color: #2a2a5c;
+    --accent-color: #8070f8;
+    --accent-hover: #6858e8;
+    --accent-gradient: linear-gradient(135deg, #3a2a9a 0%, #8070f8 100%);
+    --shadow: 0 2px 8px rgba(0,0,0,0.5);
+    --shadow-hover: 0 6px 20px rgba(128,112,248,0.25);
+    --login-bg: linear-gradient(135deg, #07071c 0%, #3a2a9a 100%);
+    --particle-color: rgba(128,112,248,0.6);
 }
 
-[data-theme="green"] {
-    --bg-primary: #f0fdf4;
+/* 🤍 Minimal - Beyaz/Gri */
+[data-theme="minimal"] {
+    --bg-primary: #f8f8f8;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #dcfce7;
-    --text-primary: #14532d;
-    --text-secondary: #166534;
-    --border-color: #bbf7d0;
-    --accent-color: #16a34a;
-    --accent-hover: #15803d;
-    --accent-gradient: linear-gradient(135deg, #166534 0%, #22c55e 100%);
+    --bg-tertiary: #efefef;
+    --text-primary: #1a1a1a;
+    --text-secondary: #5a5a5a;
+    --border-color: #dedede;
+    --accent-color: #3a3a3a;
+    --accent-hover: #1a1a1a;
+    --accent-gradient: linear-gradient(135deg, #5a5a5a 0%, #1a1a1a 100%);
     --shadow: 0 2px 8px rgba(0,0,0,0.06);
-    --shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
-}
-
-[data-theme="orange"] {
-    --bg-primary: #fff7ed;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #ffedd5;
-    --text-primary: #7c2d12;
-    --text-secondary: #9a3412;
-    --border-color: #fed7aa;
-    --accent-color: #ea580c;
-    --accent-hover: #c2410c;
-    --accent-gradient: linear-gradient(135deg, #c2410c 0%, #f97316 100%);
-    --shadow: 0 2px 8px rgba(0,0,0,0.06);
-    --shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
-}
-
-[data-theme="rose"] {
-    --bg-primary: #fff1f2;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #ffe4e6;
-    --text-primary: #881337;
-    --text-secondary: #9f1239;
-    --border-color: #fecdd3;
-    --accent-color: #e11d48;
-    --accent-hover: #be123c;
-    --accent-gradient: linear-gradient(135deg, #be185d 0%, #f472b6 100%);
-    --shadow: 0 2px 8px rgba(0,0,0,0.06);
-    --shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
+    --shadow-hover: 0 6px 20px rgba(0,0,0,0.12);
+    --login-bg: linear-gradient(135deg, #888 0%, #2a2a2a 100%);
+    --particle-color: rgba(58,58,58,0.15);
 }
 
 body {
@@ -108,8 +94,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--login-bg);
     padding: 1rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .login-container {
@@ -606,7 +594,7 @@ body {
 .avatar-display {
     width: 300px;
     height: 300px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -876,7 +864,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
     margin-bottom: 1rem;
     overflow: hidden;
 }
@@ -967,7 +955,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
 }
 
 .current-avatar svg {
@@ -1066,7 +1054,7 @@ body {
 
 /* Pelin Special Section */
 .pelin-special {
-    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    background: var(--accent-gradient);
     border-radius: 12px;
     padding: 1.5rem;
     color: white;
@@ -1372,7 +1360,7 @@ body {
     text-align: center;
     margin-bottom: 2rem;
     padding: 2rem;
-    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    background: var(--accent-gradient);
     border-radius: 16px;
     color: white;
 }
@@ -1389,7 +1377,7 @@ body {
 }
 
 .love-counter-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
     border-radius: 16px;
     padding: 2rem;
     text-align: center;
@@ -1435,7 +1423,7 @@ body {
     background: var(--bg-tertiary);
     padding: 1.5rem;
     border-radius: 12px;
-    border-left: 3px solid #ff6b9d;
+    border-left: 3px solid var(--accent-color);
 }
 
 .message-content p {
@@ -1451,7 +1439,7 @@ body {
 }
 
 .heart-rain-btn {
-    background: linear-gradient(135deg, #ff6b9d 0%, #ff8a95 100%);
+    background: var(--accent-gradient);
     color: white;
     border: none;
     border-radius: 25px;
@@ -1466,7 +1454,7 @@ body {
 .heart-rain-btn:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-hover);
-    background: linear-gradient(135deg, #ff8a95 0%, #ff6b9d 100%);
+    background: var(--accent-gradient);
 }
 
 .surprise-grid {
@@ -1588,7 +1576,7 @@ body {
     align-items: center;
     padding: 2rem;
     border-bottom: 1px solid var(--border-color);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
     color: white;
 }
 
@@ -2121,7 +2109,7 @@ input[type="date"]:focus {
 
 /* Gün Sayacı */
 .days-counter-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
     border-radius: 16px;
     padding: 2rem;
     text-align: center;
@@ -2809,4 +2797,243 @@ input[type="date"]:focus {
     .days-number { font-size: 2.75rem; }
     .nav-btn span { font-size: 1.1rem; }
     .theme-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Canlı Sayaç */
+.live-counter-card {
+    background: var(--accent-gradient);
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    color: white;
+    box-shadow: var(--shadow-hover);
+    margin-bottom: 1rem;
+}
+
+.live-counter-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.live-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 52px;
+}
+
+.live-num {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: transform 0.15s ease;
+}
+
+.live-num.tick {
+    transform: scale(1.15);
+}
+
+.live-label {
+    font-size: 0.65rem;
+    opacity: 0.8;
+    margin-top: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.live-sep {
+    font-size: 1.5rem;
+    font-weight: 700;
+    opacity: 0.7;
+    margin-bottom: 0.75rem;
+}
+
+/* Günlük mesaj kartı */
+.daily-message-card {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+    border-left: 3px solid var(--accent-color);
+}
+
+.daily-message-card p {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    font-style: italic;
+    margin: 0;
+}
+
+@media (max-width: 400px) {
+    .live-num { font-size: 1.6rem; }
+    .live-unit { min-width: 42px; }
+}
+
+/* ===== TEMA ANİMASYONLARI ===== */
+
+/* Tüm temalar için ortak partikül */
+.theme-particle {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    background: var(--particle-color);
+    animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+    0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.8; }
+    100% { transform: translateY(-120px) translateX(var(--drift, 30px)) scale(0.5); opacity: 0; }
+}
+
+/* Cosmos yıldızlar */
+.cosmos-star {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    background: white;
+    animation: starTwinkle ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+    0%, 100% { opacity: 0.15; transform: scale(1); }
+    50%       { opacity: 0.9;  transform: scale(1.5); }
+}
+
+/* Forest köşe dekorasyonu - CSS tabanlı */
+.forest-corner {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    width: 80px;
+    height: 80px;
+    opacity: 0.12;
+    animation: cornerSway 5s ease-in-out infinite;
+}
+
+.forest-corner.tl { top: 0; left: 0; border-top: 3px solid var(--accent-color); border-left: 3px solid var(--accent-color); border-radius: 0 0 60px 0; }
+.forest-corner.tr { top: 0; right: 0; border-top: 3px solid var(--accent-color); border-right: 3px solid var(--accent-color); border-radius: 0 0 0 60px; }
+.forest-corner.bl { bottom: 60px; left: 0; border-bottom: 3px solid var(--accent-color); border-left: 3px solid var(--accent-color); border-radius: 0 60px 0 0; }
+.forest-corner.br { bottom: 60px; right: 0; border-bottom: 3px solid var(--accent-color); border-right: 3px solid var(--accent-color); border-radius: 60px 0 0 0; }
+
+@keyframes cornerSway {
+    0%, 100% { opacity: 0.12; }
+    50%       { opacity: 0.22; }
+}
+
+/* Sakura - küçük yuvarlak partiküller */
+.sakura-particle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 50% 0 50% 0;
+    background: var(--accent-color);
+    opacity: 0;
+    animation: sakuraDrift linear infinite;
+}
+
+@keyframes sakuraDrift {
+    0%   { transform: translateY(-10px) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.5; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+}
+
+body > *:not(.theme-particle):not(.cosmos-star):not(.forest-corner):not(.sakura-particle) {
+    position: relative;
+    z-index: 1;
+}
+
+#fullPage {
+    z-index: 9000 !important;
+    position: fixed !important;
+}
+
+
+
+/* Ana sayfa aksiyon butonları */
+.home-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.home-action-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.85rem 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.home-action-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* Tam Ekran Sayfa */
+.full-page {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-primary);
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.full-page-header {
+    background: var(--accent-gradient);
+    color: white;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.full-page-back {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.full-page-back:hover {
+    background: rgba(255,255,255,0.35);
+}
+
+.full-page-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.full-page-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    padding-bottom: 80px;
 }

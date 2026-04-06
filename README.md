@@ -1,92 +1,90 @@
-# Emir & Pelin - Web Sitesi
+# E & P
 
-Gerçek zamanlı senkronizasyonlu, PWA destekli kişisel web uygulaması.
+Emir ve Pelin için yapılmış kişisel web uygulaması. Firebase ile gerçek zamanlı senkronizasyon, PWA desteği.
+
+**Canlı:** https://dumvivimosmyra.github.io/emir-pelin-site/
+
+---
 
 ## Özellikler
 
-### Kullanıcı Sistemi
-- Çift kullanıcı: Emir Kağan & Pelin
-- Şifre korumalı giriş
-- Profil fotoğrafı yükleme, şifre değiştirme
+### Bölümler
+- **Ana Sayfa** — Canlı gün/saat/dk/sn sayacı, günlük mesaj (özel günlere duyarlı), istatistikler
+- **Mesajlaşma** — WhatsApp tarzı gerçek zamanlı sohbet, 50+ emoji reaksiyon
+- **Müzik** — YouTube API ile şarkı arama, masaüstünde sayfada çalma, mobilde YouTube Music'e açma
+- **Hayaller** — Paylaşılan hayal listesi, CRUD
+- **Notlar** — Kişisel notlar, CRUD
+- **Profil** — Fotoğraf yükleme, tema seçimi, şifre değiştirme
+- **Anılar** — Fotoğraflı anı kutusu (tam ekran galeri, swipe), şiirler, özel günler takvimi
 
-### Mesajlaşma
-- WhatsApp tarzı gerçek zamanlı mesajlaşma
-- Emoji reaksiyonlar (50+ emoji, uzun bas veya sağ tıkla)
-- Firebase ile anlık senkronizasyon
-
-### Müzik
-- YouTube API ile şarkı arama ve ekleme
-- Masaüstünde sayfada çalma, mobilde YouTube Music'te açma
-- Şarkı düzenleme (açıklama, şarkı değiştirme)
-
-### İçerik Yönetimi
-- Müzikler, Hayaller, Notlar - CRUD işlemleri
-- Tüm veriler Firebase'e kaydediliyor
-
-### Sürpriz Bölümü
-- Anı Kutusu - fotoğraflı anılar, tam ekran galeri (swipe destekli)
-- Sevgi Şiirleri
-- Özel Günler takvimi
-- Kalp Yağmuru animasyonu
-- 365 günlük özel mesajlar
+### Tema Sistemi
+4 tema, profil sayfasından seçilir, Firebase'e kaydedilir:
+- 🌸 **Sakura** — Açık pembe, düşen partikül animasyonu
+- 🌿 **Forest** — Koyu yeşil, köşe dekorasyonu
+- 🌌 **Cosmos** — Lacivert/mor, yıldız ve partikül animasyonu
+- 🤍 **Minimal** — Beyaz/gri, animasyon yok
 
 ### PWA
-- Telefona uygulama olarak kurulabilir
-- Offline çalışma desteği
-- Ana ekrana ekle (Android & iOS)
+- Telefona uygulama olarak kurulabilir (Android: Chrome → Ana ekrana ekle, iOS: Safari → Paylaş → Ana Ekrana Ekle)
+- Offline çalışma (service worker cache)
+- Tam ekran standalone mod
 
-### Diğer
-- Dark/Light tema
-- Gün sayacı (07.12.2024'ten itibaren)
-- Responsive tasarım
+### Firebase
+- Realtime Database ile gerçek zamanlı senkronizasyon
+- Tüm veriler iki cihaz arasında anlık paylaşılır
+- Offline backup: localStorage fallback
+
+---
 
 ## Dosya Yapısı
 
 ```
 emir-pelin-site/
-├── index.html          # Ana sayfa
-├── style.css           # Stiller
-├── script.js           # Ana JavaScript
-├── firebase-api.js     # Firebase entegrasyonu
-├── youtube-music.js    # YouTube müzik sistemi
-├── manifest.json       # PWA manifest
-├── sw.js               # Service Worker
-└── README.md
+├── index.html              # UI
+├── style.css               # Stiller + 4 tema
+├── script.js               # Ana mantık
+├── firebase-api.js         # Firebase senkronizasyon
+├── youtube-music.js        # YouTube müzik sistemi
+├── sw.js                   # Service Worker (PWA)
+├── manifest.json           # PWA manifest
+├── OneSignalSDKWorker.js   # Bildirim altyapısı (hazır, aktif değil)
+└── firebase-messaging-sw.js
 ```
 
-## Firebase Veritabanı
+---
 
-```json
-{
-  "music": [...],
-  "dreams": [...],
-  "notes": [...],
-  "chatMessages": [...],
-  "memories": [...],
-  "poems": [...],
-  "specialDates": [...],
-  "profilePhotos": {},
-  "userCredentials": {},
-  "theme": "light/dark"
-}
-```
-
-## Lokal Geliştirme
+## Geliştirme
 
 ```bash
+# Lokal test
 npx serve .
-# http://localhost:3000
-```
+# → http://localhost:3000
 
-## Deploy
-
-```bash
+# Deploy
 git add .
 git commit -m "açıklama"
 git push
-# GitHub Pages otomatik güncellenir
+# GitHub Pages otomatik güncellenir (~1-2 dk)
 ```
 
-**Versiyon**: 3.0.0  
-**Son Güncelleme**: Nisan 2026  
-**Durum**: Aktif geliştirme
+---
+
+## Firebase Veritabanı Yapısı
+
+```
+music[]         → şarkılar (videoId, title, description)
+dreams[]        → hayaller
+notes[]         → notlar
+chatMessages[]  → mesajlar (reactions dahil)
+memories[]      → anılar (base64 fotoğraf)
+poems[]         → şiirler
+specialDates[]  → özel günler
+profilePhotos{} → profil fotoğrafları (base64)
+userCredentials{} → şifreler
+theme           → aktif tema
+```
+
+---
+
+**Versiyon:** 4.0.0  
+**Son Güncelleme:** Nisan 2026
