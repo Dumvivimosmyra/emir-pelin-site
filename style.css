@@ -1104,7 +1104,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 9500;
     padding: 1rem;
 }
 
@@ -2946,13 +2946,18 @@ input[type="date"]:focus {
     100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
 }
 
-body > *:not(.theme-particle):not(.cosmos-star):not(.forest-corner):not(.sakura-particle) {
+body > *:not(.theme-particle):not(.cosmos-star):not(.forest-corner):not(.sakura-particle):not(.minimal-heart):not(.modal):not(#fullPage):not(#musicAddModal):not(#musicEditModal) {
     position: relative;
     z-index: 1;
 }
 
 #fullPage {
     z-index: 9000 !important;
+    position: fixed !important;
+}
+
+.modal {
+    z-index: 9500 !important;
     position: fixed !important;
 }
 
@@ -3036,4 +3041,216 @@ body > *:not(.theme-particle):not(.cosmos-star):not(.forest-corner):not(.sakura-
     overflow-y: auto;
     padding: 1.25rem;
     padding-bottom: 80px;
+}
+
+/* ===== YENİ YAPI STİLLERİ ===== */
+
+/* Header profil */
+.app-logo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    letter-spacing: 0.05em;
+}
+
+.header-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.header-profile:hover {
+    border-color: var(--accent-color);
+}
+
+.header-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.header-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.header-username {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.header-chevron {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+/* Profile Dropdown */
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-hover);
+    z-index: 200;
+    min-width: 180px;
+    overflow: hidden;
+}
+
+.profile-dropdown button {
+    display: block;
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    background: none;
+    border: none;
+    text-align: left;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.profile-dropdown button:hover {
+    background: var(--bg-tertiary);
+}
+
+.profile-dropdown button:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Hub Grid (Köşemiz & Birlikte) */
+.hub-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    padding: 0.25rem 0;
+}
+
+.hub-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+}
+
+.hub-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.hub-card:active {
+    transform: translateY(0);
+}
+
+.hub-icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.hub-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.hub-coming {
+    opacity: 0.6;
+    position: relative;
+}
+
+.hub-coming::after {
+    content: 'Yakında';
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.6rem;
+    background: var(--accent-color);
+    color: white;
+    padding: 0.15rem 0.4rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* Sub-section full page header action */
+#fullPageHeaderAction {
+    margin-left: auto;
+}
+
+/* Yağmur modu yoğunluk sınıfı */
+body.rain-mode .sakura-particle,
+body.rain-mode .theme-particle,
+body.rain-mode .cosmos-star {
+    animation-duration: calc(var(--anim-dur, 10s) * 0.4) !important;
+}
+
+/* Minimal tema kalp yağmuru */
+.minimal-heart {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    color: #aaa;
+    font-size: 0.9rem;
+    animation: minimalHeartFall linear forwards;
+    opacity: 0;
+}
+
+@keyframes minimalHeartFall {
+    0%   { transform: translateY(-10px); opacity: 0; }
+    10%  { opacity: 0.4; }
+    90%  { opacity: 0.3; }
+    100% { transform: translateY(105vh); opacity: 0; }
+}
+
+/* App header position relative for dropdown */
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1rem;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Dinamik oluşturulan tüm modallar full page üzerinde olsun */
+#musicAddModal,
+#musicEditModal,
+.modal:not(#addModal):not(#editModal) {
+    z-index: 9500 !important;
+    position: fixed !important;
 }

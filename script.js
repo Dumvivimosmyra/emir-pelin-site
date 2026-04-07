@@ -47,9 +47,15 @@ function loadUserSettings() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
         document.documentElement.setAttribute('data-theme', savedTheme);
-        setTimeout(() => startThemeAnimation(savedTheme), 500);
+        setTimeout(() => {
+            startThemeAnimation(savedTheme);
+            startRainModeScheduler(savedTheme);
+        }, 500);
     } else {
-        setTimeout(() => startThemeAnimation('sakura'), 500);
+        setTimeout(() => {
+            startThemeAnimation('sakura');
+            startRainModeScheduler('sakura');
+        }, 500);
     }
 }
 
@@ -75,6 +81,35 @@ function setTheme(theme) {
         btn.classList.toggle('active', btn.dataset.theme === theme);
     });
     startThemeAnimation(theme);
+    startRainModeScheduler(theme);
+}
+
+// Yağmur modu - her 60 saniyede bir 7 sn yoğun animasyon
+let _rainScheduler = null;
+function startRainModeScheduler(theme) {
+    if (_rainScheduler) clearInterval(_rainScheduler);
+    if (theme === 'minimal') {
+        // Minimal: kalp yağmuru
+        _rainScheduler = setInterval(() => triggerRainMode(theme), 60000);
+    } else if (theme !== 'minimal') {
+        _rainScheduler = setInterval(() => triggerRainMode(theme), 60000);
+    }
+}
+
+function triggerRainMode(theme) {
+    document.body.classList.add('rain-mode');
+    const count = theme === 'sakura' ? 12 : theme === 'forest' ? 10 : theme === 'cosmos' ? 15 : 8;
+
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+            if (theme === 'sakura') spawnSakura();
+            else if (theme === 'forest') spawnForestParticles();
+            else if (theme === 'cosmos') spawnCosmosParticles();
+            else if (theme === 'minimal') spawnMinimalHeart();
+        }, i * 200);
+    }
+
+    setTimeout(() => document.body.classList.remove('rain-mode'), 7000);
 }
 
 // Tema animasyonları
@@ -175,6 +210,20 @@ function spawnCosmosParticles() {
         document.body.appendChild(p);
         setTimeout(() => p.remove(), 14000);
     }
+}
+
+function spawnMinimalHeart() {
+    const h = document.createElement('div');
+    h.className = 'minimal-heart';
+    h.textContent = '♡';
+    h.style.cssText = `
+        left:${Math.random() * 100}vw;
+        top:-20px;
+        animation-duration:${Math.random() * 5 + 6}s;
+        font-size:${Math.random() * 0.6 + 0.7}rem;
+    `;
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 12000);
 }
 
 // Initialize App
@@ -358,14 +407,46 @@ function logout() {
 }
 
 function showMainApp() {
-    const welcomeMessage = document.getElementById('welcomeMessage');
-    welcomeMessage.textContent = `Hoş Geldin ${userCredentials[currentUser].name} 💕`;
-    
-    // Setup profile section
+    // Header profil güncelle
+    updateHeaderProfile();
     setupProfileSection();
-    
-    // Setup surprise section
     setupSurpriseSection();
+}
+
+function updateHeaderProfile() {
+    const headerAvatar = document.getElementById('headerAvatar');
+    const headerUsername = document.getElementById('headerUsername');
+    if (!headerAvatar || !headerUsername) return;
+
+    const user = profilePhotos[currentUser];
+    if (user && user.photo) {
+        headerAvatar.innerHTML = `<img src="${user.photo}" alt="">`;
+    } else {
+        headerAvatar.textContent = user ? user.defaultEmoji : '👤';
+    }
+    headerUsername.textContent = userCredentials[currentUser]?.name || currentUser;
+}
+
+function toggleProfileMenu() {
+    const dropdown = document.getElementById('profileDropdown');
+    if (dropdown) dropdown.classList.toggle('hidden');
+    // Dışarı tıklayınca kapat
+    setTimeout(() => {
+        document.addEventListener('click', closeProfileMenuOutside, { once: true });
+    }, 10);
+}
+
+function closeProfileMenuOutside(e) {
+    const dropdown = document.getElementById('profileDropdown');
+    const profile = document.getElementById('headerProfile');
+    if (dropdown && !dropdown.contains(e.target) && !profile.contains(e.target)) {
+        dropdown.classList.add('hidden');
+    }
+}
+
+function closeProfileMenu() {
+    const dropdown = document.getElementById('profileDropdown');
+    if (dropdown) dropdown.classList.add('hidden');
 }
 
 // Profile Section Setup
@@ -636,13 +717,14 @@ function removePhoto() {
 function updateProfileAvatar() {
     const currentAvatar = document.getElementById('currentAvatar');
     if (!currentAvatar) return;
-    
     const user = profilePhotos[currentUser];
     if (user.photo) {
-        currentAvatar.innerHTML = `<img src="${user.photo}" alt="${userCredentials[currentUser].name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+        currentAvatar.innerHTML = `<img src="${user.photo}" alt="${userCredentials[currentUser].name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
     } else {
-        currentAvatar.innerHTML = `<div style="font-size: 4rem;">${user.defaultEmoji}</div>`;
+        currentAvatar.innerHTML = `<div style="font-size:4rem;">${user.defaultEmoji}</div>`;
     }
+    // Header'ı da güncelle
+    updateHeaderProfile();
 }
 
 // Image resize and crop function
@@ -734,59 +816,10 @@ function showProfileMessage(message, type) {
 
 // Surprise Section Setup
 function setupSurpriseSection() {
+    // surpriseContent artık HTML'de yok, sessizce geç
     const surpriseContent = document.getElementById('surpriseContent');
-    
-    // Hem Pelin hem Emir sürprizleri görebilir
-    surpriseContent.innerHTML = `
-        <div class="surprise-welcome">
-            <h2>💕 Pelin'e Özel Sürprizler</h2>
-            <p>${currentUser === 'pelin' ? 'Bu bölüm sadece senin için hazırlandı!' : 'Pelin için hazırladığın özel bölüm'} ❤️</p>
-        </div>
-        
-        <div class="love-counter-card">
-            <div class="counter-display">
-                <span class="counter-label">Nerdeyse bir yıldır birlikteyiz ❤️</span>
-            </div>
-        </div>
-        
-        <div class="daily-message-card">
-            <h3>💌 Bugünün Özel Mesajı</h3>
-            <div class="message-content">
-                <p id="dailyMessage">Sen benim hayatımın en güzel hediyesisin 💕</p>
-            </div>
-        </div>
-        
-        <div class="surprise-actions">
-            <button class="heart-rain-btn" onclick="startHeartRain()">
-                💖 Kalp Yağmuru Başlat 💖
-            </button>
-        </div>
-        
-        <div class="surprise-grid">
-            <div class="surprise-card" onclick="openMemorySection()">
-                <div class="surprise-icon">📸</div>
-                <div class="surprise-title">Anı Kutusu</div>
-                <div class="surprise-description">Güzel anılarımızı ekle ve görüntüle</div>
-            </div>
-            
-            <div class="surprise-card" onclick="openPoemSection()">
-                <div class="surprise-icon">📝</div>
-                <div class="surprise-title">Sevgi Şiiri</div>
-                <div class="surprise-description">${currentUser === 'emir' ? 'Pelin için şiir yaz' : 'Emir\'in yazdığı şiirler'}</div>
-            </div>
-            
-            <div class="surprise-card" onclick="openSpecialDatesSection()">
-                <div class="surprise-icon">📅</div>
-                <div class="surprise-title">Özel Günler</div>
-                <div class="surprise-description">Özel günleri planla ve görüntüle</div>
-            </div>
-        </div>
-    `;
-    
-    updateLoveCounter();
-    updateDailyMessage();
+    if (!surpriseContent) return;
 }
-
 // Surprise Functions - setupSurpriseSection artık HTML'de statik
 function updateLoveCounter() {
     const startDate = new Date('2024-12-07');
@@ -2047,16 +2080,81 @@ function showSection(sectionName) {
     const navBtn = document.querySelector(`[data-section="${sectionName}"]`);
     if (navBtn) navBtn.classList.add('active');
 
-    document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+    document.querySelectorAll('.content-section').forEach(section => {
+        if (section.style.display !== 'none') section.classList.remove('active');
+    });
     const section = document.getElementById(`${sectionName}Section`);
     if (section) section.classList.add('active');
 
     currentSection = sectionName;
 
-    // Chat açılınca mesajları yükle ve scroll'a git
-    if (sectionName === 'chat') {
-        loadMessages();
+    if (sectionName === 'chat') loadMessages();
+    closeProfileMenu();
+}
+
+// Alt bölümleri full page olarak aç
+function openSubSection(type) {
+    const config = {
+        music:  { title: '🎵 Müzik' },
+        notes:  { title: '📝 Notlar' },
+        dreams: { title: '✨ Hayaller' },
+        letter: { title: '💌 Mektup', coming: true },
+        quiz:   { title: '🎯 Quiz', coming: true },
+        duygu:  { title: '💭 Duygu', coming: true },
+        aliskanlik: { title: '🔄 Alışkanlık', coming: true },
+        hedef:  { title: '🎯 Hedef', coming: true },
+    };
+
+    const c = config[type];
+    if (!c) return;
+
+    if (c.coming) {
+        openFullPage(c.title, (body) => {
+            body.innerHTML = `
+                <div style="text-align:center;padding:3rem 1rem;color:var(--text-secondary);">
+                    <div style="font-size:3rem;margin-bottom:1rem;">🚧</div>
+                    <p style="font-size:1.1rem;font-weight:500;">Yakında geliyor</p>
+                    <p style="margin-top:0.5rem;font-size:0.9rem;">Bu özellik henüz hazır değil.</p>
+                </div>
+            `;
+        });
+        return;
     }
+
+    openFullPage(c.title, (body) => {
+        // Ekle butonu
+        const addBar = document.createElement('div');
+        addBar.style.cssText = 'margin-bottom:1rem;display:flex;justify-content:flex-end;';
+
+        if (type === 'music') {
+            addBar.innerHTML = `<button class="add-btn" onclick="openMusicAddModal()">+ Ekle</button>`;
+        } else if (type === 'notes') {
+            addBar.innerHTML = `<button class="add-btn" onclick="addNote()">+ Ekle</button>`;
+        } else if (type === 'dreams') {
+            addBar.innerHTML = `<button class="add-btn" onclick="addDream()">+ Ekle</button>`;
+        }
+
+        const listDiv = document.createElement('div');
+        listDiv.id = `${type}List`;
+        listDiv.className = 'item-list';
+
+        body.appendChild(addBar);
+        body.appendChild(listDiv);
+
+        // Direkt render et - veriler zaten appData'da
+        if (type === 'music') {
+            renderMusicList();
+        } else {
+            // appData kontrolü
+            if (appData[type] && appData[type].length > 0) {
+                renderSection(type);
+            } else {
+                // Firebase'den yüklenmeyi bekle
+                listDiv.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⏳</div><p>Yükleniyor...</p></div>';
+                setTimeout(() => renderSection(type), 1500);
+            }
+        }
+    });
 }
 
 // Data Management
@@ -2218,16 +2316,17 @@ function deleteItem(type, id) {
 
 // Render Functions
 function renderSection(type) {
-    // Müzik için ayrı render sistemi
     if (type === 'music') {
         if (typeof renderMusicList === 'function') renderMusicList();
         return;
     }
 
     const container = document.getElementById(`${type}List`);
+    if (!container) return; // Full page henüz açılmamış olabilir
+
     const items = appData[type];
-    
-    if (items.length === 0) {
+
+    if (!items || items.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">${getEmptyIcon(type)}</div>
@@ -2236,7 +2335,7 @@ function renderSection(type) {
         `;
         return;
     }
-    
+
     container.innerHTML = items.map(item => `
         <div class="item-card">
             <div class="item-header">
@@ -2246,24 +2345,13 @@ function renderSection(type) {
                     <div>${item.createdAtFormatted}</div>
                     <div class="item-actions">
                         ${item.createdBy === currentUser ? `
-                            <button class="edit-btn" onclick="editItem('${type}', ${item.id})" title="Düzenle">
-                                ✏️
-                            </button>
+                            <button class="edit-btn" onclick="editItem('${type}', ${item.id})" title="Düzenle">✏️</button>
                         ` : ''}
-                        <button class="delete-btn" onclick="deleteItem('${type}', ${item.id})" title="Sil">
-                            🗑️
-                        </button>
+                        <button class="delete-btn" onclick="deleteItem('${type}', ${item.id})" title="Sil">🗑️</button>
                     </div>
                 </div>
             </div>
             ${item.description ? `<div class="item-description">${escapeHtml(item.description)}</div>` : ''}
-            ${type === 'music' && item.youtubeUrl ? `
-                <div class="youtube-player" id="player-${item.id}">
-                    <button class="play-btn" onclick="toggleYoutube(${item.id}, '${getYoutubeId(item.youtubeUrl)}')">
-                        ▶ Çal
-                    </button>
-                </div>
-            ` : ''}
         </div>
     `).join('');
 }

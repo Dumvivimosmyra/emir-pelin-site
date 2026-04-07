@@ -5,319 +5,326 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E & P</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#c45c82">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="E & P">
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-screen">
-        <div class="login-container">
-            <div class="login-header">
-                <h2>E & P</h2>
-                <p>Giriş yap</p>
+
+<!-- Login Screen -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-container">
+        <div class="login-header">
+            <h2>E & P</h2>
+            <p>Giriş yap</p>
+        </div>
+        <div class="login-form">
+            <div class="user-selection">
+                <div class="user-option" onclick="selectUser('emir')">
+                    <div class="user-avatar-display">
+                        <div class="selected-avatar" id="emirAvatar"></div>
+                    </div>
+                    <span class="user-name">Emir</span>
+                    <input type="radio" name="selectedUser" value="emir" id="userEmir">
+                </div>
+                <div class="user-option" onclick="selectUser('pelin')">
+                    <div class="user-avatar-display">
+                        <div class="selected-avatar" id="pelinAvatar"></div>
+                    </div>
+                    <span class="user-name">Pelin</span>
+                    <input type="radio" name="selectedUser" value="pelin" id="userPelin">
+                </div>
             </div>
-            <div class="login-form">
-                <div class="user-selection">
-                    <div class="user-option" onclick="selectUser('emir')">
-                        <div class="user-avatar-display">
-                            <div class="selected-avatar" id="emirAvatar"></div>
-                        </div>
-                        <span class="user-name">Emir</span>
-                        <input type="radio" name="selectedUser" value="emir" id="userEmir">
-                    </div>
-                    <div class="user-option" onclick="selectUser('pelin')">
-                        <div class="user-avatar-display">
-                            <div class="selected-avatar" id="pelinAvatar"></div>
-                        </div>
-                        <span class="user-name">Pelin</span>
-                        <input type="radio" name="selectedUser" value="pelin" id="userPelin">
-                    </div>
-                </div>
-                <div class="password-section">
-                    <input type="password" id="passwordInput" placeholder="Şifre" maxlength="20">
-                    <button class="login-btn" onclick="attemptLogin()">Giriş</button>
-                </div>
+            <div class="password-section">
+                <input type="password" id="passwordInput" placeholder="Şifre" maxlength="20">
+                <button class="login-btn" onclick="attemptLogin()">Giriş</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Main App -->
-    <div id="mainApp" class="main-app hidden">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-content">
-                <span id="welcomeMessage" class="header-title">E & P</span>
-                <div class="header-actions">
-                    <button class="logout-btn" onclick="logout()">Çıkış</button>
-                </div>
-            </div>
-        </header>
+<!-- Main App -->
+<div id="mainApp" class="main-app hidden">
 
-        <!-- Content Sections -->
-        <main class="app-content">
-            <!-- Home Section -->
-            <section id="homeSection" class="content-section active">
-                <div class="live-counter-card">
-                    <div class="live-counter-row">
-                        <div class="live-unit">
-                            <span class="live-num" id="counterDays">0</span>
-                            <span class="live-label">gün</span>
-                        </div>
-                        <div class="live-sep">:</div>
-                        <div class="live-unit">
-                            <span class="live-num" id="counterHours">00</span>
-                            <span class="live-label">saat</span>
-                        </div>
-                        <div class="live-sep">:</div>
-                        <div class="live-unit">
-                            <span class="live-num" id="counterMinutes">00</span>
-                            <span class="live-label">dk</span>
-                        </div>
-                        <div class="live-sep">:</div>
-                        <div class="live-unit">
-                            <span class="live-num" id="counterSeconds">00</span>
-                            <span class="live-label">sn</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="daily-message-card">
-                    <p id="dailyMessage"></p>
-                </div>
-                <div class="stats-row">
-                    <div class="stat-box" onclick="showSection('music')">
-                        <span class="stat-number" id="musicCount">0</span>
-                        <span class="stat-label">Müzik</span>
-                    </div>
-                    <div class="stat-box" onclick="showSection('dreams')">
-                        <span class="stat-number" id="dreamCount">0</span>
-                        <span class="stat-label">Hayal</span>
-                    </div>
-                    <div class="stat-box" onclick="showSection('notes')">
-                        <span class="stat-number" id="noteCount">0</span>
-                        <span class="stat-label">Not</span>
-                    </div>
-                </div>
-                <div class="home-actions">
-                    <button class="home-action-btn" onclick="openMemorySection()">📸 Anılar</button>
-                    <button class="home-action-btn" onclick="openPoemSection()">📝 Şiirler</button>
-                    <button class="home-action-btn" onclick="openSpecialDatesSection()">📅 Özel Günler</button>
-                </div>
-            </section>
-
-            <!-- Chat Section -->
-            <section id="chatSection" class="content-section">
-                <div class="messaging-system">
-                    <div class="chat-container">
-                        <div class="messages-area" id="messagesArea"></div>
-                        <div class="message-input-area">
-                            <textarea id="messageInput" placeholder="Mesaj yaz..." rows="1"></textarea>
-                            <button onclick="sendMessage()" class="send-btn">➤</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Music Section -->
-            <section id="musicSection" class="content-section">
-                <div class="section-header">
-                    <h2>Müzikler</h2>
-                    <button class="add-btn" onclick="openMusicAddModal()">+ Ekle</button>
-                </div>
-                <div id="musicList" class="item-list"></div>
-            </section>
-
-            <!-- Dreams Section -->
-            <section id="dreamsSection" class="content-section">
-                <div class="section-header">
-                    <h2>Hayaller</h2>
-                    <button class="add-btn" onclick="addDream()">+ Ekle</button>
-                </div>
-                <div id="dreamsList" class="item-list"></div>
-            </section>
-
-            <!-- Notes Section -->
-            <section id="notesSection" class="content-section">
-                <div class="section-header">
-                    <h2>Notlar</h2>
-                    <button class="add-btn" onclick="addNote()">+ Ekle</button>
-                </div>
-                <div id="notesList" class="item-list"></div>
-            </section>
-
-            <!-- Surprise Section -->
-            <section id="surpriseSection" class="content-section">
-                <div class="surprise-grid">
-                    <div class="surprise-card" onclick="openMemorySection()">
-                        <div class="surprise-icon">📸</div>
-                        <div class="surprise-title">Anılar</div>
-                    </div>
-                    <div class="surprise-card" onclick="openPoemSection()">
-                        <div class="surprise-icon">📝</div>
-                        <div class="surprise-title">Şiirler</div>
-                    </div>
-                    <div class="surprise-card" onclick="openSpecialDatesSection()">
-                        <div class="surprise-icon">📅</div>
-                        <div class="surprise-title">Özel Günler</div>
-                    </div>
-                    <div class="surprise-card" onclick="startHeartRain()">
-                        <div class="surprise-icon">💖</div>
-                        <div class="surprise-title">Kalp Yağmuru</div>
-                    </div>
-                </div>
-                <div id="surpriseContent"></div>
-            </section>
-
-            <!-- Profile Section -->
-            <section id="profileSection" class="content-section">
-                <div class="profile-card">
-                    <div class="profile-header">
-                        <div class="current-avatar" id="currentAvatar">👤</div>
-                        <h2 id="profileName"></h2>
-                    </div>
-                    <div class="profile-settings">
-                        <div class="setting-group">
-                            <label>Fotoğraf</label>
-                            <div class="avatar-grid" id="profileAvatarGrid"></div>
-                        </div>
-                        <div class="setting-group">
-                            <label>Tema</label>
-                            <div class="theme-grid" id="themeGrid">
-                                <button class="theme-option" data-theme="sakura" onclick="setTheme('sakura')">
-                                    <span class="theme-dot" style="background:linear-gradient(135deg,#f093b0,#e05c8a)"></span>
-                                    <span>🌸 Sakura</span>
-                                </button>
-                                <button class="theme-option" data-theme="forest" onclick="setTheme('forest')">
-                                    <span class="theme-dot" style="background:linear-gradient(135deg,#2d5a32,#4caf6e)"></span>
-                                    <span>🌿 Forest</span>
-                                </button>
-                                <button class="theme-option" data-theme="cosmos" onclick="setTheme('cosmos')">
-                                    <span class="theme-dot" style="background:linear-gradient(135deg,#3b2d8f,#7c6ff7)"></span>
-                                    <span>🌌 Cosmos</span>
-                                </button>
-                                <button class="theme-option" data-theme="minimal" onclick="setTheme('minimal')">
-                                    <span class="theme-dot" style="background:linear-gradient(135deg,#888,#333)"></span>
-                                    <span>🤍 Minimal</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="setting-group">
-                            <label>Şifre Değiştir</label>
-                            <div class="password-change">
-                                <input type="password" id="currentPassword" placeholder="Mevcut şifre">
-                                <input type="password" id="newPassword" placeholder="Yeni şifre">
-                                <button class="save-btn" onclick="changePassword()">Kaydet</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- Navigation -->
-        <nav class="main-nav">
-            <div class="nav-container">
-                <button class="nav-btn active" onclick="showSection('home')" data-section="home">
-                    <span>🏠</span>
-                    <small>Ana</small>
-                </button>
-                <button class="nav-btn" onclick="showSection('chat')" data-section="chat">
-                    <span>💬</span>
-                    <small>Mesaj</small>
-                </button>
-                <button class="nav-btn" onclick="showSection('music')" data-section="music">
-                    <span>🎵</span>
-                    <small>Müzik</small>
-                </button>
-                <button class="nav-btn" onclick="showSection('dreams')" data-section="dreams">
-                    <span>✨</span>
-                    <small>Hayaller</small>
-                </button>
-                <button class="nav-btn" onclick="showSection('notes')" data-section="notes">
-                    <span>📝</span>
-                    <small>Notlar</small>
-                </button>
-                <button class="nav-btn" onclick="showSection('profile')" data-section="profile">
-                    <span>⚙️</span>
-                    <small>Profil</small>
-                </button>
-            </div>
-        </nav>
-    </div>
-
-    <!-- Full Screen Page -->
-    <div id="fullPage" class="full-page hidden">
-        <div class="full-page-header">
-            <button class="full-page-back" onclick="closeSectionModal()">← Geri</button>
-            <h2 id="fullPageTitle"></h2>
-        </div>
-        <div class="full-page-body" id="fullPageBody"></div>
-    </div>
-
-    <!-- Add Item Modal -->
-    <div id="addModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Yeni Ekle</h3>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="itemInput" placeholder="Buraya yazın...">
-                <textarea id="itemDescription" placeholder="Açıklama (opsiyonel)"></textarea>
-                <input type="url" id="itemYoutubeUrl" placeholder="YouTube linki (opsiyonel)" style="display:none;">
-            </div>
-            <div class="modal-footer">
-                <button class="cancel-btn" onclick="closeModal()">İptal</button>
-                <button class="save-btn" onclick="saveItem()">Kaydet</button>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <span class="app-logo">E & P</span>
+            <div class="header-profile" onclick="toggleProfileMenu()" id="headerProfile">
+                <div class="header-avatar" id="headerAvatar"></div>
+                <span class="header-username" id="headerUsername"></span>
+                <span class="header-chevron">▾</span>
             </div>
         </div>
-    </div>
+        <!-- Profile Dropdown -->
+        <div class="profile-dropdown hidden" id="profileDropdown">
+            <button onclick="showSection('profile'); closeProfileMenu()">⚙️ Profil & Ayarlar</button>
+            <button onclick="logout()">🚪 Çıkış Yap</button>
+        </div>
+    </header>
 
-    <!-- Edit Item Modal -->
-    <div id="editModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="editModalTitle">Düzenle</h3>
-                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+    <!-- Content Sections -->
+    <main class="app-content">
+
+        <!-- Home Section -->
+        <section id="homeSection" class="content-section active">
+            <div class="live-counter-card">
+                <div class="live-counter-row">
+                    <div class="live-unit">
+                        <span class="live-num" id="counterDays">0</span>
+                        <span class="live-label">gün</span>
+                    </div>
+                    <div class="live-sep">:</div>
+                    <div class="live-unit">
+                        <span class="live-num" id="counterHours">00</span>
+                        <span class="live-label">saat</span>
+                    </div>
+                    <div class="live-sep">:</div>
+                    <div class="live-unit">
+                        <span class="live-num" id="counterMinutes">00</span>
+                        <span class="live-label">dk</span>
+                    </div>
+                    <div class="live-sep">:</div>
+                    <div class="live-unit">
+                        <span class="live-num" id="counterSeconds">00</span>
+                        <span class="live-label">sn</span>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body">
-                <input type="text" id="editItemInput" placeholder="Buraya yazın...">
-                <textarea id="editItemDescription" placeholder="Açıklama (opsiyonel)"></textarea>
-                <input type="url" id="editItemYoutubeUrl" placeholder="YouTube linki (opsiyonel)" style="display:none;">
+            <div class="daily-message-card">
+                <p id="dailyMessage"></p>
             </div>
-            <div class="modal-footer">
-                <button class="cancel-btn" onclick="closeEditModal()">İptal</button>
-                <button class="save-btn" onclick="saveEditedItem()">Kaydet</button>
+            <div class="stats-row">
+                <div class="stat-box" onclick="openSubSection('music')">
+                    <span class="stat-number" id="musicCount">0</span>
+                    <span class="stat-label">Müzik</span>
+                </div>
+                <div class="stat-box" onclick="openSubSection('dreams')">
+                    <span class="stat-number" id="dreamCount">0</span>
+                    <span class="stat-label">Hayal</span>
+                </div>
+                <div class="stat-box" onclick="openSubSection('notes')">
+                    <span class="stat-number" id="noteCount">0</span>
+                    <span class="stat-label">Not</span>
+                </div>
             </div>
+        </section>
+
+        <!-- Köşemiz Section -->
+        <section id="kosemizSection" class="content-section">
+            <div class="hub-grid">
+                <div class="hub-card" onclick="openSubSection('music')">
+                    <span class="hub-icon">🎵</span>
+                    <span class="hub-title">Müzik</span>
+                </div>
+                <div class="hub-card" onclick="openSubSection('notes')">
+                    <span class="hub-icon">📝</span>
+                    <span class="hub-title">Notlar</span>
+                </div>
+                <div class="hub-card" onclick="openSubSection('dreams')">
+                    <span class="hub-icon">✨</span>
+                    <span class="hub-title">Hayaller</span>
+                </div>
+                <div class="hub-card" onclick="openMemorySection()">
+                    <span class="hub-icon">📸</span>
+                    <span class="hub-title">Anılar</span>
+                </div>
+                <div class="hub-card hub-coming" onclick="openSubSection('letter')">
+                    <span class="hub-icon">💌</span>
+                    <span class="hub-title">Mektup</span>
+                </div>
+                <div class="hub-card hub-coming" onclick="openSubSection('quiz')">
+                    <span class="hub-icon">🎯</span>
+                    <span class="hub-title">Quiz</span>
+                </div>
+                <div class="hub-card" onclick="openPoemSection()">
+                    <span class="hub-icon">📖</span>
+                    <span class="hub-title">Şiirler</span>
+                </div>
+                <div class="hub-card" onclick="openSpecialDatesSection()">
+                    <span class="hub-icon">📅</span>
+                    <span class="hub-title">Özel Günler</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Section -->
+        <section id="chatSection" class="content-section">
+            <div class="chat-container">
+                <div class="messages-area" id="messagesArea"></div>
+                <div class="message-input-area">
+                    <textarea id="messageInput" placeholder="Mesaj yaz..." rows="1"></textarea>
+                    <button onclick="sendMessage()" class="send-btn">➤</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Birlikte Section -->
+        <section id="birlikteSection" class="content-section">
+            <div class="hub-grid">
+                <div class="hub-card hub-coming" onclick="openSubSection('duygu')">
+                    <span class="hub-icon">�</span>
+                    <span class="hub-title">Duygu</span>
+                </div>
+                <div class="hub-card hub-coming" onclick="openSubSection('aliskanlik')">
+                    <span class="hub-icon">🔄</span>
+                    <span class="hub-title">Alışkanlık</span>
+                </div>
+                <div class="hub-card hub-coming" onclick="openSubSection('hedef')">
+                    <span class="hub-icon">🎯</span>
+                    <span class="hub-title">Hedef</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Music/Dreams/Notes data containers - fullpage ile açılır -->
+
+
+        <!-- Profile Section -->
+        <section id="profileSection" class="content-section">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="current-avatar" id="currentAvatar">👤</div>
+                    <h2 id="profileName"></h2>
+                </div>
+                <div class="profile-settings">
+                    <div class="setting-group">
+                        <label>Fotoğraf</label>
+                        <div class="avatar-grid" id="profileAvatarGrid"></div>
+                    </div>
+                    <div class="setting-group">
+                        <label>Tema</label>
+                        <div class="theme-grid" id="themeGrid">
+                            <button class="theme-option" data-theme="sakura" onclick="setTheme('sakura')">
+                                <span class="theme-dot" style="background:linear-gradient(135deg,#e8829e,#c45c82)"></span>
+                                <span>🌸 Sakura</span>
+                            </button>
+                            <button class="theme-option" data-theme="forest" onclick="setTheme('forest')">
+                                <span class="theme-dot" style="background:linear-gradient(135deg,#2e5230,#5cb870)"></span>
+                                <span>🌿 Forest</span>
+                            </button>
+                            <button class="theme-option" data-theme="cosmos" onclick="setTheme('cosmos')">
+                                <span class="theme-dot" style="background:linear-gradient(135deg,#3a2a9a,#8070f8)"></span>
+                                <span>🌌 Cosmos</span>
+                            </button>
+                            <button class="theme-option" data-theme="minimal" onclick="setTheme('minimal')">
+                                <span class="theme-dot" style="background:linear-gradient(135deg,#888,#2a2a2a)"></span>
+                                <span>🤍 Minimal</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label>Şifre Değiştir</label>
+                        <div class="password-change">
+                            <input type="password" id="currentPassword" placeholder="Mevcut şifre">
+                            <input type="password" id="newPassword" placeholder="Yeni şifre">
+                            <button class="save-btn" onclick="changePassword()">Kaydet</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation - 4 sekme -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <button class="nav-btn active" onclick="showSection('home')" data-section="home">
+                <span>🏠</span>
+                <small>Ana</small>
+            </button>
+            <button class="nav-btn" onclick="showSection('kosemiz')" data-section="kosemiz">
+                <span>📚</span>
+                <small>Köşemiz</small>
+            </button>
+            <button class="nav-btn" onclick="showSection('chat')" data-section="chat">
+                <span>💬</span>
+                <small>Mesaj</small>
+            </button>
+            <button class="nav-btn" onclick="showSection('birlikte')" data-section="birlikte">
+                <span>🌱</span>
+                <small>Birlikte</small>
+            </button>
+        </div>
+    </nav>
+
+</div>
+
+<!-- Full Screen Page (Anılar, Şiirler, Özel Günler, Alt bölümler) -->
+<div id="fullPage" class="full-page hidden">
+    <div class="full-page-header">
+        <button class="full-page-back" onclick="closeSectionModal()">← Geri</button>
+        <h2 id="fullPageTitle"></h2>
+        <div id="fullPageHeaderAction"></div>
+    </div>
+    <div class="full-page-body" id="fullPageBody"></div>
+</div>
+
+<!-- Add Item Modal -->
+<div id="addModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Yeni Ekle</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="itemInput" placeholder="Buraya yazın...">
+            <textarea id="itemDescription" placeholder="Açıklama (opsiyonel)"></textarea>
+            <input type="url" id="itemYoutubeUrl" placeholder="YouTube linki (opsiyonel)" style="display:none;">
+        </div>
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal()">İptal</button>
+            <button class="save-btn" onclick="saveItem()">Kaydet</button>
         </div>
     </div>
+</div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+<!-- Edit Item Modal -->
+<div id="editModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="editModalTitle">Düzenle</h3>
+            <button class="close-btn" onclick="closeEditModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="editItemInput" placeholder="Buraya yazın...">
+            <textarea id="editItemDescription" placeholder="Açıklama (opsiyonel)"></textarea>
+            <input type="url" id="editItemYoutubeUrl" placeholder="YouTube linki (opsiyonel)" style="display:none;">
+        </div>
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeEditModal()">İptal</button>
+            <button class="save-btn" onclick="saveEditedItem()">Kaydet</button>
+        </div>
+    </div>
+</div>
 
-    <!-- Scripts -->
-    <script src="firebase-api.js"></script>
-    <script src="youtube-music.js"></script>
-    <script src="script.js"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                if (window.firebase) initFirebase();
-            }, 1000);
+<!-- Scripts -->
+<script src="firebase-api.js"></script>
+<script src="youtube-music.js"></script>
+<script src="script.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            if (window.firebase) initFirebase();
+        }, 1000);
+    });
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('✅ SW kayıtlı:', reg.scope))
+                .catch(err => console.log('❌ SW hatası:', err));
         });
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('✅ SW kayıtlı:', reg.scope))
-                    .catch(err => console.log('❌ SW hatası:', err));
-            });
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
