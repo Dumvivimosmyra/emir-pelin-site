@@ -16,9 +16,18 @@ Site çalışıyor, tüm temel özellikler aktif.
 ### Yapısal Değişiklikler
 - Alt nav 7 sekmeden 4 sekmeye indirildi: Ana / Köşemiz / Mesaj / Birlikte
 - Köşemiz: Müzik, Notlar, Hayaller, Anılar, Mektup*, Quiz*, Şiirler, Özel Günler (hub grid)
-- Birlikte: Duygu*, Alışkanlık*, Hedef* (hub grid, yakında)
-- Üst bar: "Hoş Geldin" yazısı kaldırıldı, profil fotoğrafı + isim + dropdown geldi
-- Profil dropdown: Profil & Ayarlar / Çıkış Yap
+- Birlikte: Duygu ✅, Alışkanlık*, Hedef*, Keşfet & Merak* (hub grid)
+- Üst bar: profil fotoğrafı + isim + dropdown (Profil & Ayarlar / Çıkış)
+
+### Duygu Sistemi (Tamamlandı ✅)
+- 10 duygu, pastel renkler
+- Küre sistemi: tek renk radial gradient, çoklu renk yumuşak geçişli gradient
+- Cam efekti: parıltı, iç gölge
+- Maks 3 duygu seçimi, renkler birbirine geçişli
+- İsteğe bağlı not
+- Arşiv: geçmiş küreler tarih + not ile görünür
+- Firebase senkronizasyonu (`emotionEntries`)
+- İkisi de birbirinin duygularını görebilir
 
 ### Tema Sistemi
 - 4 tema: Sakura (pembe), Forest (koyu yeşil), Cosmos (lacivert/mor), Minimal (beyaz/gri)

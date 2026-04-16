@@ -231,6 +231,14 @@ function startRealtimeListeners() {
             if (typeof setTheme === 'function') setTheme(data);
         }
     });
+
+    firebaseAPI.listenToData('emotionEntries', (data) => {
+        if (data && typeof emotionData !== 'undefined') {
+            emotionData.entries = Array.isArray(data) ? data : Object.values(data);
+            localStorage.setItem('emotionEntries', JSON.stringify(emotionData.entries));
+            if (typeof renderEmotionArchive === 'function') renderEmotionArchive();
+        }
+    });
 }
 
 // enhanceSaveData - artık gerekmiyor, script.js zaten Firebase'e kaydediyor

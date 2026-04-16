@@ -1366,6 +1366,11 @@ const surpriseData = {
     specialDates: JSON.parse(localStorage.getItem('surpriseData_specialDates') || '[]')
 };
 
+// Duygu verisi
+const emotionData = {
+    entries: JSON.parse(localStorage.getItem('emotionEntries') || '[]')
+};
+
 function saveMemory(title, description, photo) {
     const newMemory = {
         id: Date.now(),
@@ -2100,7 +2105,6 @@ function openSubSection(type) {
         dreams: { title: '✨ Hayaller' },
         letter: { title: '💌 Mektup', coming: true },
         quiz:   { title: '🎯 Quiz', coming: true },
-        duygu:  { title: '💭 Duygu', coming: true },
         aliskanlik: { title: '🔄 Alışkanlık', coming: true },
         hedef:  { title: '🎯 Hedef', coming: true },
     };
@@ -2457,6 +2461,217 @@ function getUserName(user) {
         'pelin': 'Pelin'
     };
     return names[user] || user;
+}
+
+// ===== DUYGU SİSTEMİ =====
+
+const EMOTIONS = [
+    { id: 'happy',      label: 'Mutlu',       color: '#FFE066', emoji: '😊' },
+    { id: 'sad',        label: 'Hüzünlü',     color: '#7EB8E8', emoji: '😢' },
+    { id: 'angry',      label: 'Sinirli',     color: '#F08080', emoji: '😠' },
+    { id: 'anxious',    label: 'Endişeli',    color: '#C9A8E8', emoji: '😨' },
+    { id: 'tired',      label: 'Yorgun',      color: '#B8C4CC', emoji: '😴' },
+    { id: 'excited',    label: 'Heyecanlı',   color: '#FFB347', emoji: '🤩' },
+    { id: 'love',       label: 'Sevgi Dolu',  color: '#FFB6C1', emoji: '🥰' },
+    { id: 'peaceful',   label: 'Huzurlu',     color: '#90D4A8', emoji: '😌' },
+    { id: 'melancholy', label: 'Melankolik',  color: '#8899CC', emoji: '😔' },
+    { id: 'thoughtful', label: 'Düşünceli',   color: '#C4A882', emoji: '🤔' },
+];
+
+let selectedEmotions = [];
+
+function openDuyguSection() {
+    openFullPage('💭 Duygu', (body) => {
+        body.innerHTML = `
+            <div class="emotion-page">
+                <!-- Bugünün küre önizlemesi -->
+                <div class="emotion-preview-wrap">
+                    <div class="emotion-sphere" id="emotionPreviewSphere">
+                        <div class="sphere-shine"></div>
+                    </div>
+                    <p class="emotion-preview-label" id="emotionPreviewLabel">Nasıl hissediyorsun?</p>
+                </div>
+
+                <!-- Duygu seçici -->
+                <div class="emotion-selector">
+                    <p class="emotion-hint">En fazla 3 duygu seç</p>
+                    <div class="emotion-grid" id="emotionGrid"></div>
+                </div>
+
+                <!-- Not alanı -->
+                <div class="emotion-note-wrap">
+                    <textarea id="emotionNote" placeholder="Bugün nasıl geçti? (isteğe bağlı)" rows="3"></textarea>
+                </div>
+
+                <button class="emotion-save-btn" onclick="saveEmotion()">Kaydet</button>
+
+                <!-- Arşiv -->
+                <div class="emotion-archive">
+                    <h3>Arşiv</h3>
+                    <div id="emotionArchive"></div>
+                </div>
+            </div>
+        `;
+
+        selectedEmotions = [];
+        renderEmotionGrid();
+        renderEmotionArchive();
+    });
+}
+
+function renderEmotionGrid() {
+    const grid = document.getElementById('emotionGrid');
+    if (!grid) return;
+    grid.innerHTML = EMOTIONS.map(e => `
+        <div class="emotion-chip ${selectedEmotions.includes(e.id) ? 'selected' : ''}"
+             onclick="toggleEmotion('${e.id}')"
+             style="--emotion-color: ${e.color}">
+            <span>${e.emoji}</span>
+            <span>${e.label}</span>
+        </div>
+    `).join('');
+}
+
+function toggleEmotion(id) {
+    if (selectedEmotions.includes(id)) {
+        selectedEmotions = selectedEmotions.filter(e => e !== id);
+    } else {
+        if (selectedEmotions.length >= 3) return;
+        selectedEmotions.push(id);
+    }
+    renderEmotionGrid();
+    updateEmotionSphere('emotionPreviewSphere', selectedEmotions);
+
+    const label = document.getElementById('emotionPreviewLabel');
+    if (label) {
+        if (selectedEmotions.length === 0) {
+            label.textContent = 'Nasıl hissediyorsun?';
+        } else {
+            label.textContent = selectedEmotions.map(id => EMOTIONS.find(e => e.id === id)?.label).join(' + ');
+        }
+    }
+}
+
+function updateEmotionSphere(sphereId, emotionIds) {
+    const sphere = document.getElementById(sphereId);
+    if (!sphere) return;
+
+    const colors = emotionIds.map(id => EMOTIONS.find(e => e.id === id)?.color).filter(Boolean);
+
+    if (colors.length === 0) {
+        sphere.style.background = '';
+        sphere.style.removeProperty('background');
+        return;
+    }
+
+    let base;
+    if (colors.length === 1) {
+        const c = colors[0];
+        const light = lighten(c, 55);
+        const dark = darken(c, 25);
+        base = `radial-gradient(circle at 38% 32%, ${light} 0%, ${c} 50%, ${dark} 100%)`;
+    } else if (colors.length === 2) {
+        // İki renk: yumuşak geçişli diagonal
+        const [c1, c2] = colors;
+        const l1 = lighten(c1, 40);
+        const l2 = lighten(c2, 40);
+        base = `radial-gradient(circle at 30% 30%, ${l1} 0%, ${c1} 35%, ${c2} 65%, ${darken(c2, 20)} 100%)`;
+    } else {
+        // Üç renk: merkez + çevre geçişi
+        const [c1, c2, c3] = colors;
+        base = `radial-gradient(circle at 38% 32%, ${lighten(c1, 50)} 0%, ${c1} 25%, ${c2} 55%, ${c3} 80%, ${darken(c3, 20)} 100%)`;
+    }
+
+    sphere.style.background = base;
+    sphere.style.boxShadow = `0 8px 32px rgba(0,0,0,0.18), inset 0 -6px 16px rgba(0,0,0,0.1), inset 0 2px 8px rgba(255,255,255,0.25)`;
+}
+
+function lighten(hex, amount = 60) {
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    return `rgb(${Math.min(255,r+amount)},${Math.min(255,g+amount)},${Math.min(255,b+amount)})`;
+}
+
+function darken(hex, amount = 30) {
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    return `rgb(${Math.max(0,r-amount)},${Math.max(0,g-amount)},${Math.max(0,b-amount)})`;
+}
+
+function saveEmotion() {
+    if (selectedEmotions.length === 0) return;
+
+    const note = document.getElementById('emotionNote')?.value.trim() || '';
+    const today = new Date().toISOString().split('T')[0];
+
+    const entry = {
+        id: Date.now(),
+        user: currentUser,
+        emotions: [...selectedEmotions],
+        note,
+        date: today,
+        dateFormatted: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }),
+        timestamp: new Date().toISOString()
+    };
+
+    emotionData.entries.unshift(entry);
+    localStorage.setItem('emotionEntries', JSON.stringify(emotionData.entries));
+    if (window.firebaseAPI) window.firebaseAPI.saveData('emotionEntries', emotionData.entries);
+
+    // Reset
+    selectedEmotions = [];
+    const noteEl = document.getElementById('emotionNote');
+    if (noteEl) noteEl.value = '';
+    renderEmotionGrid();
+    updateEmotionSphere('emotionPreviewSphere', []);
+    const label = document.getElementById('emotionPreviewLabel');
+    if (label) label.textContent = 'Nasıl hissediyorsun?';
+    renderEmotionArchive();
+}
+
+function renderEmotionArchive() {
+    const archive = document.getElementById('emotionArchive');
+    if (!archive) return;
+
+    if (emotionData.entries.length === 0) {
+        archive.innerHTML = '<p class="empty-archive">Henüz duygu kaydı yok.</p>';
+        return;
+    }
+
+    archive.innerHTML = emotionData.entries.map((entry, i) => {
+        const sphereId = `archiveSphere_${entry.id}`;
+        const emotionLabels = entry.emotions.map(id => EMOTIONS.find(e => e.id === id)?.emoji + ' ' + EMOTIONS.find(e => e.id === id)?.label).join(', ');
+        const userName = entry.user === 'emir' ? 'Emir' : 'Pelin';
+        return `
+            <div class="emotion-archive-item">
+                <div class="archive-sphere-wrap">
+                    <div class="emotion-sphere small" id="${sphereId}">
+                        <div class="sphere-shine"></div>
+                    </div>
+                </div>
+                <div class="archive-info">
+                    <div class="archive-emotions">${emotionLabels}</div>
+                    <div class="archive-meta">${userName} · ${entry.dateFormatted}</div>
+                    ${entry.note ? `<div class="archive-note">${escapeHtml(entry.note)}</div>` : ''}
+                </div>
+                ${entry.user === currentUser ? `<button class="delete-btn" onclick="deleteEmotion(${entry.id})">🗑️</button>` : ''}
+            </div>
+        `;
+    }).join('');
+
+    // Küreleri render et
+    emotionData.entries.forEach(entry => {
+        setTimeout(() => updateEmotionSphere(`archiveSphere_${entry.id}`, entry.emotions), 50);
+    });
+}
+
+function deleteEmotion(id) {
+    emotionData.entries = emotionData.entries.filter(e => e.id !== id);
+    localStorage.setItem('emotionEntries', JSON.stringify(emotionData.entries));
+    if (window.firebaseAPI) window.firebaseAPI.saveData('emotionEntries', emotionData.entries);
+    renderEmotionArchive();
 }
 
 function escapeHtml(text) {
