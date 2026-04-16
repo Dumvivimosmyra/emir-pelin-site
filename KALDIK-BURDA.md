@@ -60,11 +60,23 @@ Site çalışıyor, tüm temel özellikler aktif.
 - Altyapı hazır: `OneSignalSDKWorker.js`, `firebase-messaging-sw.js`
 
 ### Yakında Eklenecek Özellikler
-- **Mektup:** Birbirine özel uzun form mektup
-- **Quiz:** İkisi hakkında sorular
-- **Duygu:** Günlük duygu takibi
-- **Alışkanlık:** Ortak alışkanlık + streak
-- **Hedef:** Ortak hedefler listesi
+
+**Köşemiz:**
+- **Mektup** — Zaman kapsülü. Yazar, açılma tarihi belirler, o tarihe kadar karşı taraf göremez
+- **Quiz** — Birbirini tanı modu. Emir kendisi hakkında soru yazar + doğru cevabı, Pelin cevaplar. Puan sistemi
+
+**Birlikte:**
+- **Duygu** — "Ters Yüz" tarzı. Temel duygulardan seçim, isteğe bağlı not, geçmiş takvim/grafik
+- **Alışkanlık** — Ortak alışkanlıklar (ders, kitap vb.), her gün "yaptım" işareti, streak sistemi
+- **Hedef** — Ortak hedefler listesi, tamamlandı/tamamlanmadı
+- **Keşfet & Merak** — Gemini AI ile film/kitap/genel kültür soruları, kişiliklerine göre kalibre
+
+**Kedi (AI Asistan):**
+- Gemini API entegrasyonu
+- Sayfanın köşesinde, arada baloncuk çıkarır, tıklayınca sohbet açılır
+- Projedeki tüm verileri context olarak alır, "ikiniz" perspektifinden konuşur
+- Analitik ve doğal ton, kalıp cümleler yok
+- İsim: sonra belirlenecek
 
 ### Teknik İyileştirmeler
 - Fotoğrafları Firebase Storage'a taşı (şu an base64, verimsiz)
