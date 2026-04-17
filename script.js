@@ -1382,6 +1382,16 @@ const goalData = {
     goals: JSON.parse(localStorage.getItem('goalList') || '[]')
 };
 
+// Quiz verisi
+const quizData = {
+    questions: JSON.parse(localStorage.getItem('quizQuestions') || '[]')
+};
+
+// Mektup verisi
+const letterData = {
+    letters: JSON.parse(localStorage.getItem('letterList') || '[]')
+};
+
 function saveMemory(title, description, photo) {
     const newMemory = {
         id: Date.now(),
@@ -2472,6 +2482,460 @@ function getUserName(user) {
         'pelin': 'Pelin'
     };
     return names[user] || user;
+}
+
+// ===== MEKTUP SİSTEMİ =====
+
+function openMektupSection() {
+    openFullPage('💌 Mektup', (body) => {
+        renderLetterPage(body);
+    });
+}
+
+function renderLetterPage(body) {
+    if (!body) body = document.getElementById('fullPageBody');
+    if (!body) return;
+
+    const now = new Date();
+    const other = currentUser === 'emir' ? 'pelin' : 'emir';
+
+    // Bana gelen mektuplar
+    const incoming = letterData.letters.filter(l => l.to === currentUser);
+    const unlocked = incoming.filter(l => new Date(l.unlockDate) <= now);
+    const locked = incoming.filter(l => new Date(l.unlockDate) > now);
+
+    // Benim yazdıklarım
+    const outgoing = letterData.letters.filter(l => l.from === currentUser);
+
+    body.innerHTML = `
+        <div class="letter-page">
+            <div class="letter-add-bar">
+                <button class="add-btn" onclick="showWriteLetterModal()">✍️ Mektup Yaz</button>
+            </div>
+
+            ${unlocked.length > 0 ? `
+                <div class="letter-section">
+                    <h3 class="letter-section-title">📬 Açılabilir Mektuplar</h3>
+                    ${unlocked.map(l => `
+                        <div class="letter-card unlocked" onclick="openLetter(${l.id})">
+                            <div class="letter-envelope">💌</div>
+                            <div class="letter-info">
+                                <div class="letter-title">${escapeHtml(l.title)}</div>
+                                <div class="letter-meta">${getUserName(l.from)} · ${formatLetterDate(l.unlockDate)}</div>
+                                ${l.opened ? '<span class="letter-badge read">Okundu</span>' : '<span class="letter-badge new">Yeni</span>'}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+
+            ${locked.length > 0 ? `
+                <div class="letter-section">
+                    <h3 class="letter-section-title">🔒 Bekleyen Mektuplar</h3>
+                    ${locked.map(l => {
+                        const daysLeft = Math.ceil((new Date(l.unlockDate) - now) / (1000 * 60 * 60 * 24));
+                        const totalDays = Math.ceil((new Date(l.unlockDate) - new Date(l.createdAt)) / (1000 * 60 * 60 * 24));
+                        const progress = Math.max(0, Math.min(100, Math.round(((totalDays - daysLeft) / totalDays) * 100)));
+
+                        let statusMsg;
+                        if (daysLeft > 30) statusMsg = 'Yola çıktı, uzun bir yolculuk...';
+                        else if (daysLeft > 14) statusMsg = 'Yolda, henüz erken...';
+                        else if (daysLeft > 7) statusMsg = 'Yaklaşıyor, biraz daha sabır...';
+                        else if (daysLeft > 3) statusMsg = 'Az kaldı, neredeyse geldi!';
+                        else if (daysLeft > 1) statusMsg = 'Çok yakında kapıda!';
+                        else statusMsg = 'Yarın geliyor!';
+
+                        return `
+                            <div class="letter-card locked">
+                                <div class="letter-envelope">🔒</div>
+                                <div class="letter-info">
+                                    <div class="letter-title">Gizli Mektup</div>
+                                    <div class="letter-meta">${getUserName(l.from)} · ${l.createdAtFormatted || formatLetterDate(l.createdAt)} yola çıktı</div>
+                                    <div class="letter-countdown">${statusMsg}</div>
+                                    <div class="letter-progress-wrap">
+                                        <div class="letter-progress-bar" style="width:${progress}%"></div>
+                                    </div>
+                                    <div class="letter-days-left">${daysLeft} gün kaldı</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            ` : ''}
+
+            ${incoming.length === 0 ? `
+                <div class="empty-state" style="padding:2rem 0;">
+                    <div class="empty-state-icon">💌</div>
+                    <p>Henüz sana mektup yazılmamış</p>
+                </div>
+            ` : ''}
+
+            ${outgoing.length > 0 ? `
+                <div class="letter-section">
+                    <h3 class="letter-section-title">📤 Gönderdiğin Mektuplar</h3>
+                    ${outgoing.map(l => {
+                        const isLocked = new Date(l.unlockDate) > now;
+                        const daysLeft = Math.ceil((new Date(l.unlockDate) - now) / (1000 * 60 * 60 * 24));
+                        return `
+                            <div class="letter-card outgoing">
+                                <div class="letter-envelope">${isLocked ? '⏳' : '✉️'}</div>
+                                <div class="letter-info">
+                                    <div class="letter-title">${escapeHtml(l.title)}</div>
+                                    <div class="letter-meta">${formatLetterDate(l.unlockDate)} açılacak</div>
+                                    ${isLocked ? `<div class="letter-countdown">${daysLeft} gün kaldı</div>` : ''}
+                                </div>
+                                <button class="delete-btn" onclick="deleteLetter(${l.id})">🗑️</button>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+function showWriteLetterModal() {
+    const other = currentUser === 'emir' ? 'pelin' : 'emir';
+    const otherName = currentUser === 'emir' ? 'Pelin' : 'Emir';
+
+    // Min tarih: yarın
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'writeLetterModal';
+    modal.innerHTML = `
+        <div class="modal-content letter-write-modal">
+            <div class="modal-header">
+                <h3>✍️ ${otherName}'e Mektup</h3>
+                <button class="close-btn" onclick="document.getElementById('writeLetterModal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="letterTitle" placeholder="Mektup başlığı..." maxlength="80">
+                <textarea id="letterContent" placeholder="Mektubunu yaz..." rows="8" style="min-height:180px;"></textarea>
+                <label style="font-size:0.8rem;color:var(--text-secondary);display:block;margin-bottom:0.3rem;">Açılma tarihi</label>
+                <input type="date" id="letterUnlockDate" min="${minDate}" value="${minDate}">
+                <small style="color:var(--text-secondary);font-size:0.75rem;display:block;margin-top:0.3rem;">
+                    Bu tarihten önce ${otherName} mektubu okuyamaz.
+                </small>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="document.getElementById('writeLetterModal').remove()">İptal</button>
+                <button class="save-btn" onclick="saveLetter()">Gönder 💌</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    setTimeout(() => document.getElementById('letterTitle')?.focus(), 100);
+}
+
+function saveLetter() {
+    const title = document.getElementById('letterTitle')?.value.trim();
+    const content = document.getElementById('letterContent')?.value.trim();
+    const unlockDate = document.getElementById('letterUnlockDate')?.value;
+
+    if (!title || !content || !unlockDate) return;
+
+    const other = currentUser === 'emir' ? 'pelin' : 'emir';
+
+    letterData.letters.unshift({
+        id: Date.now(),
+        title,
+        content,
+        from: currentUser,
+        to: other,
+        unlockDate,
+        opened: false,
+        createdAt: new Date().toISOString(),
+        createdAtFormatted: new Date().toLocaleDateString('tr-TR', {
+            day: 'numeric', month: 'long', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        })
+    });
+
+    saveLetterData();
+    document.getElementById('writeLetterModal')?.remove();
+    renderLetterPage();
+}
+
+function openLetter(id) {
+    const letter = letterData.letters.find(l => l.id === id);
+    if (!letter) return;
+    if (new Date(letter.unlockDate) > new Date()) return;
+
+    if (!letter.opened) {
+        letter.opened = true;
+        saveLetterData();
+    }
+
+    // Zarf animasyonu önce
+    const overlay = document.createElement('div');
+    overlay.className = 'letter-overlay';
+    overlay.innerHTML = `
+        <div class="letter-envelope-anim" id="letterEnvelopeAnim">
+            <div class="envelope-body">
+                <div class="envelope-flap"></div>
+                <div class="envelope-front">
+                    <div class="envelope-seal">💌</div>
+                    <div class="envelope-to">
+                        <span>${getUserName(letter.from)}'den</span>
+                        <span>${getUserName(letter.to === currentUser ? currentUser : letter.to)}'e</span>
+                    </div>
+                </div>
+            </div>
+            <p class="envelope-tap-hint">Açmak için dokun</p>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Zarf tıklanınca mektup açılır
+    overlay.querySelector('.letter-envelope-anim').addEventListener('click', () => {
+        overlay.querySelector('.envelope-flap').classList.add('open');
+        setTimeout(() => {
+            overlay.remove();
+            showLetterContent(letter);
+        }, 600);
+    });
+}
+
+// Dekoratif kağıt desenleri
+const LETTER_DECORATIONS = [
+    `<svg class="letter-deco" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <g opacity="0.07" fill="currentColor">
+            <circle cx="30" cy="170" r="18"/>
+            <path d="M30 152 Q20 140 30 130 Q40 140 30 152Z"/>
+            <path d="M30 152 Q42 145 48 155 Q38 162 30 152Z"/>
+            <path d="M30 152 Q18 145 12 155 Q22 162 30 152Z"/>
+            <line x1="30" y1="170" x2="30" y2="200" stroke="currentColor" stroke-width="1.5"/>
+        </g>
+    </svg>`,
+    `<svg class="letter-deco" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <g opacity="0.07" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M160 180 Q170 160 160 145 Q150 160 160 180Z"/>
+            <path d="M160 180 Q175 170 178 155 Q163 158 160 180Z"/>
+            <path d="M160 180 Q145 170 142 155 Q157 158 160 180Z"/>
+            <path d="M160 180 Q172 175 178 162"/>
+            <circle cx="160" cy="185" r="3" fill="currentColor"/>
+        </g>
+    </svg>`,
+    `<svg class="letter-deco" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <g opacity="0.07" fill="currentColor">
+            <ellipse cx="25" cy="175" rx="8" ry="12" transform="rotate(-15 25 175)"/>
+            <ellipse cx="38" cy="168" rx="8" ry="12" transform="rotate(10 38 168)"/>
+            <ellipse cx="18" cy="163" rx="7" ry="11" transform="rotate(-30 18 163)"/>
+            <circle cx="28" cy="178" r="3"/>
+        </g>
+    </svg>`,
+    `<svg class="letter-deco" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <g opacity="0.07" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M170 160 Q175 150 170 140 Q165 150 170 160Z" fill="currentColor"/>
+            <path d="M165 165 Q155 160 153 150 Q163 152 165 165Z" fill="currentColor"/>
+            <path d="M175 165 Q185 160 187 150 Q177 152 175 165Z" fill="currentColor"/>
+            <path d="M170 160 L170 185"/>
+            <path d="M165 172 Q170 168 175 172"/>
+        </g>
+    </svg>`
+];
+
+function showLetterContent(letter) {
+    const decoIndex = letter.id % LETTER_DECORATIONS.length;
+    const deco = LETTER_DECORATIONS[decoIndex];
+
+    const modal = document.createElement('div');
+    modal.className = 'modal letter-content-modal';
+    modal.innerHTML = `
+        <div class="letter-paper">
+            ${deco}
+            <div class="letter-paper-header">
+                <div class="letter-paper-from">${getUserName(letter.from)}'den, ${letter.createdAtFormatted || formatLetterDate(letter.createdAt)}</div>
+                <div class="letter-paper-title">${escapeHtml(letter.title)}</div>
+            </div>
+            <div class="letter-paper-content">${escapeHtml(letter.content).replace(/\n/g, '<br>')}</div>
+            <div class="letter-paper-footer">
+                <span>— ${getUserName(letter.from)}</span>
+            </div>
+            <button class="letter-close-btn" onclick="this.closest('.modal').remove()">Kapat</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Kağıt açılma animasyonu
+    setTimeout(() => modal.querySelector('.letter-paper').classList.add('revealed'), 50);
+    renderLetterPage();
+}
+
+function deleteLetter(id) {
+    if (!confirm('Bu mektubu silmek istediğinizden emin misiniz?')) return;
+    letterData.letters = letterData.letters.filter(l => l.id !== id);
+    saveLetterData();
+    renderLetterPage();
+}
+
+function saveLetterData() {
+    localStorage.setItem('letterList', JSON.stringify(letterData.letters));
+    if (window.firebaseAPI) window.firebaseAPI.saveData('letterList', letterData.letters);
+}
+
+function formatLetterDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// ===== QUIZ SİSTEMİ =====
+
+function openQuizSection() {
+    openFullPage('🎯 Quiz', (body) => {
+        renderQuizPage(body);
+    });
+}
+
+function renderQuizPage(body) {
+    if (!body) body = document.getElementById('fullPageBody');
+    if (!body) return;
+
+    const other = currentUser === 'emir' ? 'pelin' : 'emir';
+    const otherName = currentUser === 'emir' ? 'Pelin' : 'Emir';
+
+    // Bana sorulan bekleyen sorular
+    const pending = quizData.questions.filter(q => q.askedBy === other && !q.userAnswer);
+    // Benim sorduklarım
+    const myQuestions = quizData.questions.filter(q => q.askedBy === currentUser);
+    // Cevaplananlar
+    const answered = quizData.questions.filter(q => q.userAnswer);
+
+    // Puan hesapla
+    const myScore = quizData.questions.filter(q => q.askedBy === other && q.correct).length;
+    const otherScore = quizData.questions.filter(q => q.askedBy === currentUser && q.correct).length;
+
+    body.innerHTML = `
+        <div class="quiz-page">
+            <!-- Puan tablosu -->
+            <div class="quiz-scoreboard">
+                <div class="quiz-score-item">
+                    <span class="quiz-score-name">Ben</span>
+                    <span class="quiz-score-num">${myScore}</span>
+                </div>
+                <div class="quiz-score-vs">vs</div>
+                <div class="quiz-score-item">
+                    <span class="quiz-score-name">${otherName}</span>
+                    <span class="quiz-score-num">${otherScore}</span>
+                </div>
+            </div>
+
+            <!-- Bekleyen sorular -->
+            ${pending.length > 0 ? `
+                <div class="quiz-section">
+                    <h3 class="quiz-section-title">📬 Sana Sorulan (${pending.length})</h3>
+                    ${pending.map(q => `
+                        <div class="quiz-card pending">
+                            <div class="quiz-question">${escapeHtml(q.question)}</div>
+                            <div class="quiz-answer-form">
+                                <input type="text" class="quiz-answer-input" id="ans_${q.id}" placeholder="Cevabın...">
+                                <button class="quiz-submit-btn" onclick="submitQuizAnswer(${q.id})">Gönder</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+
+            <!-- Soru sor -->
+            <div class="quiz-section">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                    <h3 class="quiz-section-title" style="margin:0;">✏️ Soru Sor</h3>
+                    <button class="add-btn" onclick="showAddQuizModal()">+ Yeni Soru</button>
+                </div>
+                ${myQuestions.length === 0 ? `<p style="color:var(--text-secondary);font-size:0.875rem;">${otherName}'e henüz soru sormadın.</p>` : ''}
+                ${myQuestions.map(q => `
+                    <div class="quiz-card ${q.userAnswer ? (q.correct ? 'correct' : 'wrong') : 'waiting'}">
+                        <div class="quiz-question">${escapeHtml(q.question)}</div>
+                        ${q.userAnswer ? `
+                            <div class="quiz-result">
+                                <span class="quiz-user-answer">${otherName}: "${escapeHtml(q.userAnswer)}"</span>
+                                <span class="quiz-correct-answer">Doğru: "${escapeHtml(q.answer)}"</span>
+                                <span class="quiz-badge ${q.correct ? 'correct' : 'wrong'}">${q.correct ? '✓ Doğru' : '✗ Yanlış'}</span>
+                            </div>
+                        ` : `<div class="quiz-waiting">⏳ ${otherName} henüz cevaplamadı</div>`}
+                        <button class="quiz-delete-btn" onclick="deleteQuizQuestion(${q.id})">🗑️</button>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function showAddQuizModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'addQuizModal';
+    const otherName = currentUser === 'emir' ? 'Pelin' : 'Emir';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>${otherName}'e Soru Sor</h3>
+                <button class="close-btn" onclick="document.getElementById('addQuizModal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="quizQuestionInput" placeholder="Soru..." maxlength="200">
+                <input type="text" id="quizAnswerInput" placeholder="Doğru cevap..." maxlength="100">
+                <small style="color:var(--text-secondary);font-size:0.75rem;">Doğru cevabı sadece sen göreceksin.</small>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="document.getElementById('addQuizModal').remove()">İptal</button>
+                <button class="save-btn" onclick="saveQuizQuestion()">Sor</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    setTimeout(() => document.getElementById('quizQuestionInput')?.focus(), 100);
+}
+
+function saveQuizQuestion() {
+    const question = document.getElementById('quizQuestionInput')?.value.trim();
+    const answer = document.getElementById('quizAnswerInput')?.value.trim();
+    if (!question || !answer) return;
+
+    quizData.questions.unshift({
+        id: Date.now(),
+        question,
+        answer,
+        askedBy: currentUser,
+        userAnswer: null,
+        correct: null,
+        createdAt: new Date().toISOString(),
+        createdAtFormatted: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })
+    });
+
+    saveQuizData();
+    document.getElementById('addQuizModal')?.remove();
+    renderQuizPage();
+}
+
+function submitQuizAnswer(questionId) {
+    const input = document.getElementById(`ans_${questionId}`);
+    const userAnswer = input?.value.trim();
+    if (!userAnswer) return;
+
+    const q = quizData.questions.find(q => q.id === questionId);
+    if (!q) return;
+
+    q.userAnswer = userAnswer;
+    q.correct = userAnswer.toLowerCase().trim() === q.answer.toLowerCase().trim();
+    q.answeredAt = new Date().toISOString();
+
+    saveQuizData();
+    renderQuizPage();
+}
+
+function deleteQuizQuestion(id) {
+    quizData.questions = quizData.questions.filter(q => q.id !== id);
+    saveQuizData();
+    renderQuizPage();
+}
+
+function saveQuizData() {
+    localStorage.setItem('quizQuestions', JSON.stringify(quizData.questions));
+    if (window.firebaseAPI) window.firebaseAPI.saveData('quizQuestions', quizData.questions);
 }
 
 // ===== HEDEF SİSTEMİ =====

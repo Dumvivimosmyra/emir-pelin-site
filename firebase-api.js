@@ -263,6 +263,22 @@ function startRealtimeListeners() {
             if (typeof renderGoalList === 'function') renderGoalList();
         }
     });
+
+    firebaseAPI.listenToData('quizQuestions', (data) => {
+        if (data && typeof quizData !== 'undefined') {
+            quizData.questions = Array.isArray(data) ? data : Object.values(data);
+            localStorage.setItem('quizQuestions', JSON.stringify(quizData.questions));
+            if (typeof renderQuizPage === 'function') renderQuizPage();
+        }
+    });
+
+    firebaseAPI.listenToData('letterList', (data) => {
+        if (data && typeof letterData !== 'undefined') {
+            letterData.letters = Array.isArray(data) ? data : Object.values(data);
+            localStorage.setItem('letterList', JSON.stringify(letterData.letters));
+            if (typeof renderLetterPage === 'function') renderLetterPage();
+        }
+    });
 }
 
 // enhanceSaveData - artık gerekmiyor, script.js zaten Firebase'e kaydediyor

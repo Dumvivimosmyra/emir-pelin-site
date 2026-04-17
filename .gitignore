@@ -19,3 +19,6 @@ Thumbs.db
 .kiro/
 skills-lock.json
 functions/node_modules/
+
+# Firebase Functions (deploy edilmedi, Blaze planı gerekiyor)
+functions/
