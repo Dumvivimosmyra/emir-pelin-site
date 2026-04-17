@@ -34,10 +34,10 @@ window.onYouTubeIframeAPIReady = function() {
 };
 
 function onPlayerStateChange(event) {
-    // Şarkı bitince
     if (event.data === YT.PlayerState.ENDED) {
         isPlaying = false;
         updatePlayerUI(false);
+        hideMiniPlayer();
     }
     if (event.data === YT.PlayerState.PLAYING) {
         isPlaying = true;
@@ -46,6 +46,7 @@ function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PAUSED) {
         isPlaying = false;
         updatePlayerUI(false);
+        hideMiniPlayer();
     }
 }
 
@@ -82,6 +83,7 @@ function togglePlay(musicId, videoId) {
         ytPlayer.pauseVideo();
         isPlaying = false;
         updatePlayerUI(false);
+        hideMiniPlayer();
     } else {
         currentPlayingId = musicId;
         if (currentPlayingId === musicId && !isPlaying && ytPlayer.getVideoData && ytPlayer.getVideoData().video_id === videoId) {
@@ -89,7 +91,36 @@ function togglePlay(musicId, videoId) {
         } else {
             ytPlayer.loadVideoById(videoId);
         }
+        // Mini player göster
+        const music = appData.music.find(m => m.id === musicId);
+        if (music) showMiniPlayer(music.title);
     }
+}
+
+function stopMusic() {
+    if (ytPlayer && isPlaying) {
+        ytPlayer.stopVideo();
+    }
+    isPlaying = false;
+    if (currentPlayingId) {
+        const btn = document.querySelector(`[data-music-id="${currentPlayingId}"] .music-play-btn`);
+        if (btn) btn.textContent = '▶';
+    }
+    currentPlayingId = null;
+    hideMiniPlayer();
+}
+
+function showMiniPlayer(title) {
+    const player = document.getElementById('miniPlayer');
+    const titleEl = document.getElementById('miniPlayerTitle');
+    if (!player) return;
+    if (titleEl) titleEl.textContent = title;
+    player.classList.remove('hidden');
+}
+
+function hideMiniPlayer() {
+    const player = document.getElementById('miniPlayer');
+    if (player) player.classList.add('hidden');
 }
 
 // YouTube'da şarkı ara

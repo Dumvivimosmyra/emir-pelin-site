@@ -1371,6 +1371,17 @@ const emotionData = {
     entries: JSON.parse(localStorage.getItem('emotionEntries') || '[]')
 };
 
+// Alışkanlık verisi
+const habitData = {
+    habits: JSON.parse(localStorage.getItem('habitList') || '[]'),
+    logs: JSON.parse(localStorage.getItem('habitLogs') || '[]')
+};
+
+// Hedef verisi
+const goalData = {
+    goals: JSON.parse(localStorage.getItem('goalList') || '[]')
+};
+
 function saveMemory(title, description, photo) {
     const newMemory = {
         id: Date.now(),
@@ -2461,6 +2472,551 @@ function getUserName(user) {
         'pelin': 'Pelin'
     };
     return names[user] || user;
+}
+
+// ===== HEDEF SİSTEMİ =====
+
+function openHedefSection() {
+    openFullPage('🎯 Hedef', (body) => {
+        body.innerHTML = `
+            <div class="goal-page">
+                <div class="goal-add-bar">
+                    <button class="add-btn" onclick="showAddGoalModal()">+ Hedef Ekle</button>
+                </div>
+                <div id="goalList" class="goal-list"></div>
+            </div>
+        `;
+        renderGoalList();
+    });
+}
+
+function renderGoalList() {
+    const list = document.getElementById('goalList');
+    if (!list) return;
+
+    if (goalData.goals.length === 0) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎯</div><p>Henüz hedef eklenmemiş</p></div>`;
+        return;
+    }
+
+    const today = new Date();
+
+    list.innerHTML = goalData.goals.map(goal => {
+        const isOverdue = !goal.done && goal.targetDate && new Date(goal.targetDate) < today;
+        const daysLeft = goal.targetDate ? Math.ceil((new Date(goal.targetDate) - today) / (1000 * 60 * 60 * 24)) : null;
+
+        let dateLabel = '';
+        if (goal.done) {
+            dateLabel = `<span class="goal-date done-date">✓ Tamamlandı</span>`;
+        } else if (goal.targetDate) {
+            if (isOverdue) {
+                dateLabel = `<span class="goal-date overdue">${Math.abs(daysLeft)} gün geçti</span>`;
+            } else if (daysLeft === 0) {
+                dateLabel = `<span class="goal-date today-date">Bugün!</span>`;
+            } else {
+                dateLabel = `<span class="goal-date">${daysLeft} gün kaldı</span>`;
+            }
+        }
+
+        return `
+            <div class="goal-card ${goal.done ? 'completed' : ''} ${isOverdue ? 'overdue-card' : ''}">
+                <button class="goal-check" onclick="toggleGoal(${goal.id})">
+                    ${goal.done ? '✓' : '○'}
+                </button>
+                <div class="goal-content">
+                    <div class="goal-title">${escapeHtml(goal.title)}</div>
+                    ${goal.description ? `<div class="goal-desc">${escapeHtml(goal.description)}</div>` : ''}
+                    <div class="goal-meta">
+                        ${getUserName(goal.createdBy)} · ${goal.createdAtFormatted}
+                        ${dateLabel}
+                    </div>
+                    ${goal.memoryId ? `<span class="goal-memory-link" onclick="event.stopPropagation(); openMemorySection()">📸 Anıya git →</span>` : ''}
+                </div>
+                ${goal.createdBy === currentUser ? `
+                    <button class="delete-btn" onclick="deleteGoal(${goal.id})">🗑️</button>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+function toggleGoal(id) {
+    const goal = goalData.goals.find(g => g.id === id);
+    if (!goal) return;
+
+    if (goal.done) {
+        // Tamamlanmışı geri al
+        goal.done = false;
+        goal.doneAt = null;
+        saveGoalData();
+        renderGoalList();
+    } else {
+        // Tamamlandı — kutlama modalı
+        goal.done = true;
+        goal.doneAt = new Date().toISOString();
+        saveGoalData();
+        renderGoalList();
+        showGoalCelebration(goal);
+    }
+}
+
+function showGoalCelebration(goal) {
+    const linkedMusic = goal.musicId ? appData.music.find(m => m.id === goal.musicId) : null;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'goalCelebModal';
+    modal.innerHTML = `
+        <div class="modal-content goal-celeb-modal">
+            <div class="goal-celeb-header">
+                <div class="goal-celeb-emoji">🎉</div>
+                <h3>Tebrikler!</h3>
+                <p>"${escapeHtml(goal.title)}" hedefine ulaştınız!</p>
+            </div>
+            ${linkedMusic ? `
+                <div class="goal-celeb-music">
+                    <span>🎵</span>
+                    <span>${escapeHtml(linkedMusic.title)}</span>
+                </div>
+            ` : ''}
+            <div class="goal-celeb-actions">
+                <button class="save-btn" onclick="openGoalMemoryAdd(${goal.id})">
+                    📸 Anı Ekle
+                </button>
+                <button class="cancel-btn" onclick="document.getElementById('goalCelebModal').remove()">
+                    Kapat
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Bağlı şarkıyı çal
+    if (linkedMusic && linkedMusic.videoId) {
+        setTimeout(() => {
+            togglePlay(linkedMusic.id, linkedMusic.videoId);
+            showMiniPlayer(linkedMusic.title);
+        }, 500);
+    }
+
+    // Konfeti efekti
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => spawnGoalConfetti(), i * 80);
+    }
+}
+
+function spawnGoalConfetti() {
+    const colors = ['#FFE066','#FFB6C1','#90D4A8','#7EB8E8','#C9A8E8'];
+    const el = document.createElement('div');
+    el.style.cssText = `
+        position:fixed;
+        top:-10px;
+        left:${Math.random()*100}vw;
+        width:8px;height:8px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        border-radius:${Math.random()>0.5?'50%':'2px'};
+        z-index:9999;
+        pointer-events:none;
+        animation:confettiFall ${Math.random()*1.5+1}s linear forwards;
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+}
+
+function openGoalMemoryAdd(goalId) {
+    document.getElementById('goalCelebModal')?.remove();
+    // Anı ekleme modalını aç, tamamlandığında hedefle bağla
+    const goal = goalData.goals.find(g => g.id === goalId);
+    if (!goal) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📸 Anı Ekle</h3>
+                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="goalMemoryTitle" placeholder="Anı başlığı..." value="${escapeHtml(goal.title)}">
+                <textarea id="goalMemoryDesc" placeholder="Bu hedefe nasıl ulaştınız?..." rows="3"></textarea>
+                <div class="photo-upload-area">
+                    <input type="file" id="goalMemoryPhoto" accept="image/*" style="display:none;">
+                    <button class="add-btn" onclick="document.getElementById('goalMemoryPhoto').click()" style="width:100%">📷 Fotoğraf Ekle</button>
+                    <div id="goalMemoryPreview" style="margin-top:0.5rem;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="this.closest('.modal').remove()">İptal</button>
+                <button class="save-btn" onclick="saveGoalMemory(${goalId})">Kaydet</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('goalMemoryPhoto')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const preview = document.getElementById('goalMemoryPreview');
+            if (preview) preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;">`;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function saveGoalMemory(goalId) {
+    const title = document.getElementById('goalMemoryTitle')?.value.trim();
+    const desc = document.getElementById('goalMemoryDesc')?.value.trim() || '';
+    const photoInput = document.getElementById('goalMemoryPhoto');
+
+    if (!title) return;
+
+    const doSave = (photo) => {
+        const memory = {
+            id: Date.now(),
+            title,
+            description: desc,
+            photo: photo || null,
+            goalId,
+            createdBy: currentUser,
+            createdAt: new Date().toISOString(),
+            createdAtFormatted: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
+        };
+        surpriseData.memories.unshift(memory);
+        localStorage.setItem('surpriseData_memories', JSON.stringify(surpriseData.memories));
+        if (window.firebaseAPI) window.firebaseAPI.saveData('memories', surpriseData.memories);
+
+        // Hedefle bağla
+        const goal = goalData.goals.find(g => g.id === goalId);
+        if (goal) { goal.memoryId = memory.id; saveGoalData(); }
+
+        // Tüm açık modalları kapat
+        document.querySelectorAll('.modal').forEach(m => m.remove());
+        renderGoalList();
+    };
+
+    if (photoInput?.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => resizeAndCropImage(e.target.result, doSave);
+        reader.readAsDataURL(photoInput.files[0]);
+    } else {
+        doSave(null);
+    }
+}
+
+function deleteGoal(id) {
+    goalData.goals = goalData.goals.filter(g => g.id !== id);
+    saveGoalData();
+    renderGoalList();
+}
+
+function showAddGoalModal() {
+    const musicOptions = appData.music.length > 0
+        ? `<label style="font-size:0.8rem;color:var(--text-secondary);display:block;margin-bottom:0.3rem;margin-top:0.5rem;">Şarkı bağla (opsiyonel)</label>
+           <select id="goalMusicInput" style="width:100%;padding:0.6rem;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-family:inherit;font-size:0.875rem;">
+               <option value="">— Şarkı seçme —</option>
+               ${appData.music.map(m => `<option value="${m.id}">${escapeHtml(m.title)}</option>`).join('')}
+           </select>`
+        : '';
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'addGoalModal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Hedef Ekle</h3>
+                <button class="close-btn" onclick="document.getElementById('addGoalModal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="goalTitleInput" placeholder="Hedef..." maxlength="80">
+                <textarea id="goalDescInput" placeholder="Açıklama (opsiyonel)" rows="2"></textarea>
+                <label style="font-size:0.8rem;color:var(--text-secondary);display:block;margin-bottom:0.3rem;">Hedef tarihi (opsiyonel)</label>
+                <input type="date" id="goalDateInput" min="${new Date().toISOString().split('T')[0]}">
+                ${musicOptions}
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="document.getElementById('addGoalModal').remove()">İptal</button>
+                <button class="save-btn" onclick="saveNewGoal()">Ekle</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    setTimeout(() => document.getElementById('goalTitleInput')?.focus(), 100);
+}
+
+function saveNewGoal() {
+    const title = document.getElementById('goalTitleInput')?.value.trim();
+    if (!title) return;
+    const desc = document.getElementById('goalDescInput')?.value.trim() || '';
+    const date = document.getElementById('goalDateInput')?.value || null;
+    const musicId = document.getElementById('goalMusicInput')?.value || null;
+
+    goalData.goals.unshift({
+        id: Date.now(),
+        title,
+        description: desc,
+        targetDate: date,
+        musicId: musicId ? parseInt(musicId) : null,
+        done: false,
+        doneAt: null,
+        memoryId: null,
+        createdBy: currentUser,
+        createdAt: new Date().toISOString(),
+        createdAtFormatted: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
+    });
+
+    saveGoalData();
+    document.getElementById('addGoalModal')?.remove();
+    renderGoalList();
+}
+
+function saveGoalData() {
+    localStorage.setItem('goalList', JSON.stringify(goalData.goals));
+    if (window.firebaseAPI) window.firebaseAPI.saveData('goalList', goalData.goals);
+}
+
+// ===== ALISKANLIK SİSTEMİ =====
+
+const HABIT_COLORS = ['#FFB6C1','#90D4A8','#7EB8E8','#FFE066','#C9A8E8','#FFB347','#B8C4CC'];
+
+function openAliskanlikSection() {
+    openFullPage('🔄 Alışkanlık', (body) => {
+        body.innerHTML = `
+            <div class="habit-page">
+                <div class="habit-add-bar">
+                    <button class="add-btn" onclick="showAddHabitModal()">+ Alışkanlık Ekle</button>
+                </div>
+                <div id="habitList" class="habit-list"></div>
+            </div>
+        `;
+        renderHabitList();
+    });
+}
+
+function renderHabitList() {
+    const list = document.getElementById('habitList');
+    if (!list) return;
+
+    if (habitData.habits.length === 0) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔄</div><p>Henüz alışkanlık eklenmemiş</p></div>`;
+        return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    list.innerHTML = habitData.habits.map(habit => {
+        const emirDone = habitData.logs.some(l => l.habitId === habit.id && l.user === 'emir' && l.date === today);
+        const pelinDone = habitData.logs.some(l => l.habitId === habit.id && l.user === 'pelin' && l.date === today);
+        const myDone = currentUser === 'emir' ? emirDone : pelinDone;
+        const streak = calcStreak(habit.id);
+
+        return `
+            <div class="habit-card" style="--habit-color: ${habit.color}" onclick="openHabitDetail(${habit.id})">
+                <div class="habit-card-left">
+                    <div class="habit-color-dot" style="background:${habit.color}"></div>
+                    <div class="habit-info">
+                        <div class="habit-title">${escapeHtml(habit.title)}</div>
+                        <div class="habit-streak">🔥 ${streak} gün</div>
+                    </div>
+                </div>
+                <div class="habit-card-right">
+                    <div class="habit-users">
+                        <span class="habit-user-dot ${emirDone ? 'done' : ''}" title="Emir">E</span>
+                        <span class="habit-user-dot ${pelinDone ? 'done' : ''}" title="Pelin">P</span>
+                    </div>
+                    <button class="habit-check-btn ${myDone ? 'checked' : ''}"
+                            onclick="event.stopPropagation(); toggleHabit(${habit.id})">
+                        ${myDone ? '✓' : '○'}
+                    </button>
+                </div>
+                ${habit.createdBy === currentUser ? `
+                    <button class="habit-delete-btn" onclick="event.stopPropagation(); deleteHabit(${habit.id})">🗑️</button>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+function calcStreak(habitId) {
+    const today = new Date();
+    let streak = 0;
+
+    for (let i = 0; i < 365; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+
+        const emirDone = habitData.logs.some(l => l.habitId === habitId && l.user === 'emir' && l.date === dateStr);
+        const pelinDone = habitData.logs.some(l => l.habitId === habitId && l.user === 'pelin' && l.date === dateStr);
+
+        if (emirDone && pelinDone) {
+            streak++;
+        } else if (i === 0) {
+            // Bugün henüz tamamlanmamış, dünden başla
+            continue;
+        } else {
+            break;
+        }
+    }
+    return streak;
+}
+
+function toggleHabit(habitId) {
+    const today = new Date().toISOString().split('T')[0];
+    const existing = habitData.logs.findIndex(l => l.habitId === habitId && l.user === currentUser && l.date === today);
+
+    if (existing >= 0) {
+        habitData.logs.splice(existing, 1);
+    } else {
+        habitData.logs.push({ habitId, user: currentUser, date: today, timestamp: new Date().toISOString() });
+    }
+
+    saveHabitData();
+    renderHabitList();
+}
+
+function showAddHabitModal() {
+    const color = HABIT_COLORS[habitData.habits.length % HABIT_COLORS.length];
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'addHabitModal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Alışkanlık Ekle</h3>
+                <button class="close-btn" onclick="document.getElementById('addHabitModal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="habitTitleInput" placeholder="Alışkanlık adı..." maxlength="50">
+                <div class="habit-color-picker">
+                    ${HABIT_COLORS.map(c => `
+                        <div class="habit-color-opt ${c === color ? 'selected' : ''}"
+                             style="background:${c}"
+                             onclick="selectHabitColor('${c}', this)"></div>
+                    `).join('')}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="document.getElementById('addHabitModal').remove()">İptal</button>
+                <button class="save-btn" onclick="saveNewHabit('${color}')">Ekle</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    setTimeout(() => document.getElementById('habitTitleInput')?.focus(), 100);
+}
+
+function selectHabitColor(color, el) {
+    document.querySelectorAll('.habit-color-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    const btn = document.querySelector('#addHabitModal .save-btn');
+    if (btn) btn.setAttribute('onclick', `saveNewHabit('${color}')`);
+}
+
+function saveNewHabit(color) {
+    const input = document.getElementById('habitTitleInput');
+    const title = input?.value.trim();
+    if (!title) return;
+
+    habitData.habits.push({
+        id: Date.now(),
+        title,
+        color,
+        createdBy: currentUser,
+        createdAt: new Date().toISOString()
+    });
+
+    saveHabitData();
+    document.getElementById('addHabitModal')?.remove();
+    renderHabitList();
+}
+
+function deleteHabit(id) {
+    if (!confirm('Bu alışkanlığı silmek istediğinizden emin misiniz?')) return;
+    habitData.habits = habitData.habits.filter(h => h.id !== id);
+    habitData.logs = habitData.logs.filter(l => l.habitId !== id);
+    saveHabitData();
+    renderHabitList();
+}
+
+function saveHabitData() {
+    localStorage.setItem('habitList', JSON.stringify(habitData.habits));
+    localStorage.setItem('habitLogs', JSON.stringify(habitData.logs));
+    if (window.firebaseAPI) {
+        window.firebaseAPI.saveData('habitList', habitData.habits);
+        window.firebaseAPI.saveData('habitLogs', habitData.logs);
+    }
+}
+
+function openHabitDetail(habitId) {
+    const habit = habitData.habits.find(h => h.id === habitId);
+    if (!habit) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'habitDetailModal';
+    modal.innerHTML = `
+        <div class="modal-content habit-detail-modal">
+            <div class="modal-header" style="border-bottom:3px solid ${habit.color}">
+                <h3>${escapeHtml(habit.title)}</h3>
+                <button class="close-btn" onclick="document.getElementById('habitDetailModal').remove()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="habit-detail-streak">
+                    <span class="habit-detail-streak-num">🔥 ${calcStreak(habitId)}</span>
+                    <span class="habit-detail-streak-label">gün üst üste</span>
+                </div>
+                <div class="habit-calendar-label">Son 30 Gün</div>
+                <div class="habit-calendar" id="habitCalendar_${habitId}"></div>
+                <div class="habit-calendar-legend">
+                    <span class="legend-item"><span class="legend-dot both"></span> İkisi de</span>
+                    <span class="legend-item"><span class="legend-dot one"></span> Biri</span>
+                    <span class="legend-item"><span class="legend-dot none"></span> Hiçbiri</span>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    renderHabitCalendar(habitId, habit.color);
+}
+
+function renderHabitCalendar(habitId, color) {
+    const cal = document.getElementById(`habitCalendar_${habitId}`);
+    if (!cal) return;
+
+    const today = new Date();
+    const days = [];
+
+    for (let i = 29; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const dayNum = d.getDate();
+        const monthShort = d.toLocaleDateString('tr-TR', { month: 'short' });
+
+        const emirDone = habitData.logs.some(l => l.habitId === habitId && l.user === 'emir' && l.date === dateStr);
+        const pelinDone = habitData.logs.some(l => l.habitId === habitId && l.user === 'pelin' && l.date === dateStr);
+
+        let status = 'none';
+        if (emirDone && pelinDone) status = 'both';
+        else if (emirDone || pelinDone) status = 'one';
+
+        const isToday = i === 0;
+
+        days.push(`
+            <div class="habit-cal-day ${status} ${isToday ? 'today' : ''}"
+                 style="${status === 'both' ? `background:${color};border-color:${color}` : status === 'one' ? `border-color:${color}` : ''}"
+                 title="${dateStr}">
+                <span class="cal-day-num">${dayNum}</span>
+                ${i === 0 || dayNum === 1 ? `<span class="cal-month">${monthShort}</span>` : ''}
+            </div>
+        `);
+    }
+
+    cal.innerHTML = days.join('');
 }
 
 // ===== DUYGU SİSTEMİ =====

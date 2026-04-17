@@ -170,11 +170,11 @@
                     <span class="hub-icon">�</span>
                     <span class="hub-title">Duygu</span>
                 </div>
-                <div class="hub-card hub-coming" onclick="openSubSection('aliskanlik')">
+                <div class="hub-card" onclick="openAliskanlikSection()">
                     <span class="hub-icon">🔄</span>
                     <span class="hub-title">Alışkanlık</span>
                 </div>
-                <div class="hub-card hub-coming" onclick="openSubSection('hedef')">
+                <div class="hub-card" onclick="openHedefSection()">
                     <span class="hub-icon">🎯</span>
                     <span class="hub-title">Hedef</span>
                 </div>
@@ -230,6 +230,15 @@
         </section>
 
     </main>
+
+    <!-- Mini Player -->
+    <div id="miniPlayer" class="mini-player hidden">
+        <div class="mini-player-info">
+            <span class="mini-player-icon">🎵</span>
+            <span class="mini-player-title" id="miniPlayerTitle"></span>
+        </div>
+        <button class="mini-player-stop" onclick="stopMusic()">⏹</button>
+    </div>
 
     <!-- Bottom Navigation - 4 sekme -->
     <nav class="main-nav">

@@ -239,6 +239,30 @@ function startRealtimeListeners() {
             if (typeof renderEmotionArchive === 'function') renderEmotionArchive();
         }
     });
+
+    firebaseAPI.listenToData('habitList', (data) => {
+        if (data && typeof habitData !== 'undefined') {
+            habitData.habits = Array.isArray(data) ? data : Object.values(data);
+            localStorage.setItem('habitList', JSON.stringify(habitData.habits));
+            if (typeof renderHabitList === 'function') renderHabitList();
+        }
+    });
+
+    firebaseAPI.listenToData('habitLogs', (data) => {
+        if (data && typeof habitData !== 'undefined') {
+            habitData.logs = Array.isArray(data) ? data : Object.values(data);
+            localStorage.setItem('habitLogs', JSON.stringify(habitData.logs));
+            if (typeof renderHabitList === 'function') renderHabitList();
+        }
+    });
+
+    firebaseAPI.listenToData('goalList', (data) => {
+        if (data && typeof goalData !== 'undefined') {
+            goalData.goals = Array.isArray(data) ? data : Object.values(data);
+            localStorage.setItem('goalList', JSON.stringify(goalData.goals));
+            if (typeof renderGoalList === 'function') renderGoalList();
+        }
+    });
 }
 
 // enhanceSaveData - artık gerekmiyor, script.js zaten Firebase'e kaydediyor
