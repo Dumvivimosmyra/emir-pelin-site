@@ -43,7 +43,11 @@
 - `gemini.js` hazır, `gemini-2.0-flash` modeli kullanıyor
 - Çalışınca test et: Birlikte → Keşfet & Merak → kategori seç
 
-### Kedi AI Asistanı (Sonraki Büyük Özellik)
+### Tarçın (Kedi AI)
+- CSS SVG kedi tasarımı: oturan, uyuyan, gözleri kırpan animasyonlar
+- Groq API ile sohbet
+- Sağ altta sabit, baloncuk çıkarıyor
+- **Bilinen sorun:** Login ekranında scroll yapınca sol altta küçük görsel bozukluk — sonra düzeltilecek
 - Gemini API ile sayfanın köşesinde oturan kedi karakteri
 - Projedeki tüm verileri context olarak alır
 - "İkiniz" perspektifinden konuşur, analitik ve doğal ton

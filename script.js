@@ -387,19 +387,23 @@ function login(user) {
 }
 
 function logout() {
+    // Tarçın'ı kaldır
+    const w = document.getElementById('tarcinWidget');
+    if (w) w.remove();
+    if (typeof tarcinChatHistory !== 'undefined') tarcinChatHistory = [];
+
     currentUser = null;
     selectedUser = null;
     localStorage.removeItem('currentUser');
-    
+
     const loginScreen = document.getElementById('loginScreen');
     const mainApp = document.getElementById('mainApp');
-    
+
     mainApp.classList.add('hidden');
     loginScreen.classList.remove('hidden');
     loginScreen.style.transform = 'translateY(0)';
     loginScreen.style.opacity = '1';
-    
-    // Reset login form
+
     document.getElementById('passwordInput').value = '';
     document.querySelectorAll('.user-option').forEach(option => {
         option.classList.remove('selected');
@@ -407,10 +411,13 @@ function logout() {
 }
 
 function showMainApp() {
-    // Header profil güncelle
     updateHeaderProfile();
     setupProfileSection();
     setupSurpriseSection();
+    // Tarçın'ı başlat - sadece giriş yapıldıktan sonra
+    setTimeout(() => {
+        if (typeof initTarcin === 'function') initTarcin();
+    }, 1500);
 }
 
 function updateHeaderProfile() {

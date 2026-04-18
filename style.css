@@ -2946,7 +2946,7 @@ input[type="date"]:focus {
     100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
 }
 
-body > *:not(.theme-particle):not(.cosmos-star):not(.forest-corner):not(.sakura-particle):not(.minimal-heart):not(.modal):not(#fullPage):not(#musicAddModal):not(#musicEditModal) {
+body > *:not(.theme-particle):not(.cosmos-star):not(.forest-corner):not(.sakura-particle):not(.minimal-heart):not(.modal):not(#fullPage):not(#musicAddModal):not(#musicEditModal):not(#tarcinWidget):not(.letter-overlay):not(.letter-content-modal) {
     position: relative;
     z-index: 1;
 }
@@ -4859,4 +4859,187 @@ body:has(.mini-player:not(.hidden)) .app-content {
     color: white !important;
     border-color: transparent !important;
     font-weight: 600;
+}
+
+/* ===== TARÇIN AI KEDİ ===== */
+
+#tarcinWidget {
+    position: fixed !important;
+    bottom: 80px;
+    right: 1rem;
+    z-index: 8000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.tarcin-bubble {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px 16px 4px 16px;
+    padding: 0.6rem 0.875rem;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    max-width: 200px;
+    box-shadow: var(--shadow-hover);
+    animation: bubblePop 0.3s ease;
+}
+
+@keyframes bubblePop {
+    from { transform: scale(0.8) translateY(10px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.tarcin-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+.tarcin-btn:hover {
+    transform: scale(1.08) translateY(-2px);
+}
+
+.tarcin-cat-display {
+    width: 72px;
+    height: 80px;
+    overflow: hidden;
+    display: block;
+}
+
+.tarcin-cat-svg {
+    width: 72px;
+    height: 80px;
+    display: block;
+}
+
+/* Sohbet penceresi */
+.tarcin-chat {
+    position: fixed;
+    bottom: 170px;
+    right: 1rem;
+    width: 300px;
+    max-height: 420px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--shadow-hover);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 8000;
+    animation: chatSlideUp 0.25s ease;
+}
+
+@keyframes chatSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+.tarcin-chat-header {
+    background: linear-gradient(135deg, #E8834A, #C96A30);
+    color: white;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.tarcin-chat-header button {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tarcin-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 200px;
+    max-height: 280px;
+}
+
+.tarcin-msg {
+    max-width: 85%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.tarcin-msg-ai {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.tarcin-msg-user {
+    background: #E8834A;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.tarcin-typing {
+    opacity: 0.6;
+    font-style: italic;
+}
+
+.tarcin-input-area {
+    padding: 0.6rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 0.4rem;
+}
+
+.tarcin-input-area input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.tarcin-input-area input:focus {
+    outline: none;
+    border-color: #E8834A;
+}
+
+.tarcin-input-area button {
+    background: #E8834A;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+    .tarcin-chat {
+        width: calc(100vw - 2rem);
+        right: 1rem;
+    }
 }
