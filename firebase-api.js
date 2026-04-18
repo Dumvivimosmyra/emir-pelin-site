@@ -272,6 +272,14 @@ function startRealtimeListeners() {
         }
     });
 
+    firebaseAPI.listenToData('kesfeHistory', (data) => {
+        if (data && typeof kesfeData !== 'undefined') {
+            kesfeData.history = Array.isArray(data) ? data : Object.values(data);
+            localStorage.setItem('kesfeHistory', JSON.stringify(kesfeData.history));
+            if (typeof renderKesfePage === 'function') renderKesfePage();
+        }
+    });
+
     firebaseAPI.listenToData('letterList', (data) => {
         if (data && typeof letterData !== 'undefined') {
             letterData.letters = Array.isArray(data) ? data : Object.values(data);

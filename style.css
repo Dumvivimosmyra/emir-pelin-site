@@ -4790,3 +4790,73 @@ body:has(.mini-player:not(.hidden)) .app-content {
 .kesfe-correct-ans {
     color: #166534;
 }
+
+/* Keşfet geçmiş meta */
+.kesfe-history-meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.3rem;
+    flex-wrap: wrap;
+}
+
+.kesfe-cat-tag {
+    font-size: 0.7rem;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    padding: 0.1rem 0.4rem;
+    color: var(--text-secondary);
+    text-transform: capitalize;
+}
+
+.kesfe-who {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.kesfe-date {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+/* Keşfet yorum tipi */
+.kesfe-result.yorum {
+    border-color: var(--accent-color);
+    background: color-mix(in srgb, var(--accent-color) 5%, var(--bg-secondary));
+}
+
+.kesfe-history-item.yorum {
+    border-left-color: var(--accent-color);
+}
+
+.kesfe-ai-comment {
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 0.2rem;
+}
+
+.kesfe-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+    margin-left: auto;
+    padding: 0.1rem 0.3rem;
+}
+
+.kesfe-history-item:hover .kesfe-delete-btn {
+    opacity: 1;
+}
+
+.kesfe-lucky-btn {
+    background: var(--accent-gradient) !important;
+    color: white !important;
+    border-color: transparent !important;
+    font-weight: 600;
+}
