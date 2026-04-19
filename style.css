@@ -100,7 +100,6 @@ body {
     inset: 0;
     overflow: hidden;
 }
-}
 
 .login-container {
     background: var(--bg-secondary);

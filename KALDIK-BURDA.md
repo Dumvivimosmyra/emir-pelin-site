@@ -4,16 +4,23 @@
 
 ---
 
+## Mevcut Durum
+
+Site çalışıyor. Tüm temel özellikler aktif.
+
+---
+
 ## Tamamlanan Özellikler
 
 ### Temel Sistem
 - Giriş (Emir / Pelin, şifre korumalı)
 - Firebase gerçek zamanlı senkronizasyon
 - PWA (telefona kurulabilir, offline)
-- 4 tema: Sakura, Forest, Cosmos, Minimal (CSS partikül animasyonları + yağmur modu)
+- Tema kişiye özel: her kullanıcı kendi temasını seçer, `theme_emir` / `theme_pelin` olarak saklanır
+- 4 tema: Sakura, Forest, Cosmos, Minimal (CSS partikül animasyonları + yağmur modu her 60sn)
 - Canlı sayaç (gün/saat/dk/sn, 07.12.2024'ten)
 - Günlük mesaj (özel günlere duyarlı, 365 mesaj)
-- Mini player (şarkı çalarken nav üstünde çıkar, durdurulabilir)
+- Mini player (şarkı çalarken nav üstünde çıkar)
 
 ### Navigasyon (4 sekme)
 - Ana / Köşemiz / Mesaj / Birlikte
@@ -24,50 +31,38 @@
 - Notlar, Hayaller: CRUD
 - Anılar: fotoğraf + tam ekran galeri (swipe)
 - Şiirler: Emir yazar, ikisi okur
-- Özel Günler: takvim, geri sayım
-- Quiz: birbirini tanı modu, soru sor/cevapla, puan sistemi
+- Özel Günler: takvim, geri sayım, müzik bağlama, tamamlanınca anı ekleme
+- Quiz: birbirini tanıma sistemi — profil doldurma (renkler, yemekler, istekler vb.), soru sor/cevapla, puan sistemi
 - Mektup: zaman kapsülü, zarf animasyonu, kağıt efekti, ilerleme çubuğu
 
 ### Birlikte
-- Duygu: küre sistemi, renk geçişleri, arşiv, Firebase sync
-- Alışkanlık: streak, 30 günlük takvim, Firebase sync
-- Hedef: müzik bağlama, tamamlanınca kutlama + konfeti + anı ekleme, Firebase sync
-- Keşfet & Merak: Gemini API altyapısı hazır (rate limit sorunu, bekliyor)
+- Duygu: küre sistemi, renk geçişleri, arşiv
+- Alışkanlık: streak, 30 günlük takvim
+- Hedef: müzik bağlama, kutlama + konfeti + anı ekleme
+- Keşfet & Merak: Groq AI (Llama 3.1), INTP/INFP kişilik bazlı sorular, bilgi/yorum tipi, geçmiş
+
+### Tarçın (AI Kedi)
+- CSS SVG kedi: oturan, uyuyan, gözleri kırpan animasyonlar
+- Groq API ile sohbet
+- Sağ altta sabit, arada baloncuk çıkarır
+- Giriş sonrası aktif olur
 
 ---
 
 ## Bekleyen / Yapılacaklar
 
-### Gemini API (Keşfet & Merak)
-- Key: `AIzaSyAZPOXe4ycPDZy7UvgFSagoCPiqoEtVnZU` (rate limit doldu, birkaç saat bekle)
-- `gemini.js` hazır, `gemini-2.0-flash` modeli kullanıyor
-- Çalışınca test et: Birlikte → Keşfet & Merak → kategori seç
-
-### Tarçın (Kedi AI)
-- CSS SVG kedi tasarımı: oturan, uyuyan, gözleri kırpan animasyonlar
-- Groq API ile sohbet
-- Sağ altta sabit, baloncuk çıkarıyor
-- **Bilinen sorun:** Login ekranında scroll yapınca sol altta küçük görsel bozukluk — sonra düzeltilecek
-- Gemini API ile sayfanın köşesinde oturan kedi karakteri
-- Projedeki tüm verileri context olarak alır
-- "İkiniz" perspektifinden konuşur, analitik ve doğal ton
-- Arada baloncuk çıkarır, tıklayınca sohbet açılır
-- İsim: sonra belirlenecek
-- **Önce Keşfet & Merak çalışsın, sonra kedi yapılacak**
-
-### Quiz AI Entegrasyonu
-- Gemini, ikisinin profilini okuyup kişiselleştirilmiş sorular üretecek
-- Cevap değerlendirmesi anlam bazlı olacak (tam eşleşme değil)
-- Mevcut quiz sistemi üzerine inşa edilecek
+### Tarçın İşlevsellik
+- Alışkanlık hatırlatması ("3 gündür ders çalışmadınız")
+- Hedef yaklaşınca uyarı
+- Duygu analizi ("Bu hafta çoğunlukla yorgun görünüyorsunuz")
 
 ### Bildirimler
-- OneSignal: GitHub Pages subdirectory sorunu var
+- OneSignal: GitHub Pages subdirectory sorunu
 - Custom domain alınırsa (~100-150TL/yıl) çözülür
-- Altyapı hazır: `OneSignalSDKWorker.js`
 
-### Teknik İyileştirmeler
-- Fotoğrafları Firebase Storage'a taşı (şu an base64)
-- Mobil UX ince ayarları
+### Bilinen Küçük Sorunlar
+- Login ekranında scroll yapınca sol altta küçük görsel bozukluk (SVG path)
+- Mobil ince ayarlar (test edilecek)
 
 ---
 
@@ -82,22 +77,29 @@ Modallar: 9500
 Zarf overlay / letter: 9600
 ```
 
-### Gemini API
+### Groq API
 ```js
 // gemini.js
-const GEMINI_API_KEY = 'AIzaSyAZPOXe4ycPDZy7UvgFSagoCPiqoEtVnZU';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+const GROQ_API_KEY = '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';
+const GROQ_MODEL = 'llama-3.1-8b-instant';
 ```
 
-### Firebase Veri Yapısı (Yeni Eklenenler)
+### Tema Sistemi
+- Kişiye özel: `localStorage.getItem('theme_emir')` / `localStorage.getItem('theme_pelin')`
+- Firebase: `theme_emir` / `theme_pelin` path'leri
+
+### Firebase Veri Yapısı (Tüm Anahtarlar)
 ```
-emotionEntries[]  → duygu kayıtları
-habitList[]       → alışkanlık tanımları
-habitLogs[]       → günlük işaretlemeler
-goalList[]        → hedefler
-quizQuestions[]   → quiz soruları
-letterList[]      → mektuplar
-kesfeHistory[]    → keşfet & merak geçmişi
+music, dreams, notes, chatMessages
+memories, poems, specialDates
+profilePhotos, userCredentials
+theme_emir, theme_pelin
+emotionEntries
+habitList, habitLogs
+goalList
+quizQuestions, quizProfile_emir, quizProfile_pelin
+letterList
+kesfeHistory
 ```
 
 ### Deploy

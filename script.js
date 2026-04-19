@@ -42,9 +42,21 @@ function loadUserSettings() {
     if (savedCredentials) {
         Object.assign(userCredentials, JSON.parse(savedCredentials));
     }
-    // Genel tema (giriş öncesi)
-    const savedTheme = localStorage.getItem('theme') || 'sakura';
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    // Load theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        setTimeout(() => {
+            startThemeAnimation(savedTheme);
+            startRainModeScheduler(savedTheme);
+        }, 500);
+    } else {
+        setTimeout(() => {
+            startThemeAnimation('sakura');
+            startRainModeScheduler('sakura');
+        }, 500);
+    }
 }
 
 // Save user settings
@@ -62,11 +74,10 @@ function toggleTheme() {
 function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     // Kişiye özel kaydet
-    if (currentUser) {
-        localStorage.setItem(`theme_${currentUser}`, theme);
-        if (window.firebaseAPI) window.firebaseAPI.saveData(`theme_${currentUser}`, theme);
-    } else {
-        localStorage.setItem('theme', theme);
+    const key = currentUser ? `theme_${currentUser}` : 'theme';
+    localStorage.setItem(key, theme);
+    if (window.firebaseAPI && currentUser) {
+        window.firebaseAPI.saveData(`theme_${currentUser}`, theme);
     }
     document.querySelectorAll('.theme-option').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === theme);
@@ -107,10 +118,6 @@ function triggerRainMode(theme) {
 function startThemeAnimation(theme) {
     document.querySelectorAll('.sakura-particle, .forest-corner, .cosmos-star, .theme-particle').forEach(el => el.remove());
     if (window._themeAnimInterval) clearInterval(window._themeAnimInterval);
-
-    // Login ekranındaysa animasyon başlatma
-    const loginScreen = document.getElementById('loginScreen');
-    if (loginScreen && !loginScreen.classList.contains('hidden')) return;
 
     if (theme === 'sakura') {
         spawnSakura();
@@ -409,20 +416,7 @@ function showMainApp() {
     updateHeaderProfile();
     setupProfileSection();
     setupSurpriseSection();
-
-    // Kişiye özel tema yükle
-    const userTheme = localStorage.getItem(`theme_${currentUser}`) || localStorage.getItem('theme') || 'sakura';
-    document.documentElement.setAttribute('data-theme', userTheme);
-    setTimeout(() => {
-        startThemeAnimation(userTheme);
-        startRainModeScheduler(userTheme);
-        // Tema butonunu işaretle
-        document.querySelectorAll('.theme-option').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.theme === userTheme);
-        });
-    }, 300);
-
-    // Tarçın'ı başlat
+    // Tarçın'ı başlat - sadece giriş yapıldıktan sonra
     setTimeout(() => {
         if (typeof initTarcin === 'function') initTarcin();
     }, 1500);
@@ -1400,12 +1394,6 @@ const goalData = {
 // Quiz verisi
 const quizData = {
     questions: JSON.parse(localStorage.getItem('quizQuestions') || '[]')
-};
-
-// Quiz profil verisi - birbirini tanıma
-const quizProfile = {
-    emir: JSON.parse(localStorage.getItem('quizProfile_emir') || '{}'),
-    pelin: JSON.parse(localStorage.getItem('quizProfile_pelin') || '{}')
 };
 
 // Mektup verisi
@@ -2803,236 +2791,6 @@ function formatLetterDate(dateStr) {
     return new Date(dateStr).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-// ===== QUIZ SİSTEMİ =====
-
-const QUIZ_CATEGORIES = {
-    renkler:    { icon: '🎨', label: 'Renkler & Estetik' },
-    yemekler:   { icon: '🍕', label: 'Yemekler & İçecekler' },
-    istekler:   { icon: '✨', label: 'İstekler & Hayaller' },
-    korkular:   { icon: '😨', label: 'Korkular & Kaygılar' },
-    muzik:      { icon: '🎵', label: 'Müzik & Sanat' },
-    film:       { icon: '🎬', label: 'Film & Dizi' },
-    kisilik:    { icon: '🧠', label: 'Kişilik & Düşünceler' },
-};
-
-const QUIZ_QUESTIONS_POOL = {
-    renkler: ['En sevdiğin renk nedir?','Hiç sevmediğin renk hangisi?','Odanın duvarını hangi renge boyatırdın?'],
-    yemekler: ['En sevdiğin yemek nedir?','Sabah kahvaltısında ne yemeyi seversin?','En sevdiğin tatlı nedir?','Dışarıda yemek yersen hangi mutfağı tercih edersin?'],
-    istekler: ['Hayatında bir kez yapmak istediğin şey nedir?','Şu an en çok ne istiyorsun?','Hangi ülkeye gitmek isterdin?','Bir süper gücün olsaydı ne olurdu?'],
-    korkular: ['En büyük korkunun nedir?','Hangi hayvan seni en çok korkutur?','Gelecekle ilgili en çok neyi düşünürsün?'],
-    muzik: ['Şu an en çok dinlediğin şarkı hangisi?','Hangi müzik türünü hiç dinleyemezsin?','Bir konser izleyebilseydin kim olurdu?'],
-    film: ['En sevdiğin film nedir?','Hangi dizi seni en çok etkiledi?','Favori film karakterin kim?'],
-    kisilik: ['Kendini 3 kelimeyle nasıl tanımlarsın?','İnsanlarda en çok neyi seversin?','Yalnız mı yoksa kalabalık mı tercih edersin?'],
-};
-
-function openQuizSection() {
-    openFullPage('🎯 Quiz', (body) => { renderQuizPage(body); });
-}
-
-function renderQuizPage(body) {
-    if (!body) body = document.getElementById('fullPageBody');
-    if (!body) return;
-    const other = currentUser === 'emir' ? 'pelin' : 'emir';
-    const otherName = currentUser === 'emir' ? 'Pelin' : 'Emir';
-    const myName = currentUser === 'emir' ? 'Emir' : 'Pelin';
-    const pending = quizData.questions.filter(q => q.askedBy === other && !q.userAnswer);
-    const myQ = quizData.questions.filter(q => q.askedBy === currentUser);
-    const myScore = quizData.questions.filter(q => q.askedBy === other && q.correct).length;
-    const otherScore = quizData.questions.filter(q => q.askedBy === currentUser && q.correct).length;
-    const myAnswered = Object.keys(quizProfile[currentUser]).length;
-    const otherAnswered = Object.keys(quizProfile[other]).length;
-
-    body.innerHTML = `
-        <div class="quiz-page">
-            <div class="quiz-scoreboard">
-                <div class="quiz-score-item"><span class="quiz-score-name">${myName}</span><span class="quiz-score-num">${myScore}</span></div>
-                <div class="quiz-score-vs">vs</div>
-                <div class="quiz-score-item"><span class="quiz-score-name">${otherName}</span><span class="quiz-score-num">${otherScore}</span></div>
-            </div>
-            <div class="quiz-profile-bar">
-                <div class="quiz-profile-info">
-                    <span>Senin profilin: ${myAnswered} cevap</span>
-                    <button class="quiz-profile-btn" onclick="openMyProfileQuiz()">Profili Doldur</button>
-                </div>
-                <div class="quiz-profile-info">
-                    <span>${otherName}: ${otherAnswered} cevap</span>
-                    <button class="quiz-profile-btn" onclick="openOtherProfileView('${other}')">Gör</button>
-                </div>
-            </div>
-            ${pending.length > 0 ? `
-                <div class="quiz-section">
-                    <h3 class="quiz-section-title">📬 Sana Sorulan (${pending.length})</h3>
-                    ${pending.map(q => `
-                        <div class="quiz-card pending">
-                            <div class="quiz-question">${escapeHtml(q.question)}</div>
-                            <div class="quiz-answer-form">
-                                <input type="text" class="quiz-answer-input" id="ans_${q.id}" placeholder="Cevabın...">
-                                <button class="quiz-submit-btn" onclick="submitQuizAnswer(${q.id})">Gönder</button>
-                            </div>
-                        </div>`).join('')}
-                </div>` : ''}
-            <div class="quiz-section">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
-                    <h3 class="quiz-section-title" style="margin:0;">✏️ ${otherName}'e Soru Sor</h3>
-                    <button class="add-btn" onclick="showAddQuizModal()">+ Soru Sor</button>
-                </div>
-                ${myQ.length === 0 ? `<p style="color:var(--text-secondary);font-size:0.875rem;">${otherName}'e henüz soru sormadın.</p>` : ''}
-                ${myQ.map(q => `
-                    <div class="quiz-card ${q.userAnswer ? (q.correct ? 'correct' : 'wrong') : 'waiting'}">
-                        <div class="quiz-question">${escapeHtml(q.question)}</div>
-                        ${q.userAnswer ? `
-                            <div class="quiz-result">
-                                <span class="quiz-user-answer">${otherName}: "${escapeHtml(q.userAnswer)}"</span>
-                                <span class="quiz-correct-answer">Doğru: "${escapeHtml(q.answer)}"</span>
-                                <span class="quiz-badge ${q.correct ? 'correct' : 'wrong'}">${q.correct ? '✓ Doğru' : '✗ Yanlış'}</span>
-                            </div>` : `<div class="quiz-waiting">⏳ ${otherName} henüz cevaplamadı</div>`}
-                        <button class="quiz-delete-btn" onclick="deleteQuizQuestion(${q.id})">🗑️</button>
-                    </div>`).join('')}
-            </div>
-        </div>`;
-}
-
-function openMyProfileQuiz() {
-    const myProfile = quizProfile[currentUser];
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.id = 'profileQuizModal';
-    const questions = Object.values(QUIZ_QUESTIONS_POOL).flat();
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width:480px;">
-            <div class="modal-header">
-                <h3>📝 Profilini Doldur</h3>
-                <button class="close-btn" onclick="document.getElementById('profileQuizModal').remove()">&times;</button>
-            </div>
-            <div class="modal-body" style="max-height:60vh;overflow-y:auto;">
-                <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem;">Cevapların kaydedilir, karşı taraf bunları bilerek sana soru sorar.</p>
-                ${questions.map(q => {
-                    const key = q.substring(0,30).replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ]/g,'_');
-                    const existing = myProfile[key] || '';
-                    return `<div class="profile-quiz-item">
-                        <label style="font-size:0.8rem;color:var(--text-secondary);">${q}</label>
-                        <input type="text" class="profile-quiz-input" data-key="${key}" value="${escapeHtml(existing)}" placeholder="Cevabın...">
-                    </div>`;
-                }).join('')}
-            </div>
-            <div class="modal-footer">
-                <button class="cancel-btn" onclick="document.getElementById('profileQuizModal').remove()">İptal</button>
-                <button class="save-btn" onclick="saveMyProfile()">Kaydet</button>
-            </div>
-        </div>`;
-    document.body.appendChild(modal);
-}
-
-function saveMyProfile() {
-    document.querySelectorAll('.profile-quiz-input').forEach(input => {
-        const key = input.dataset.key;
-        const val = input.value.trim();
-        if (val) quizProfile[currentUser][key] = val;
-        else delete quizProfile[currentUser][key];
-    });
-    localStorage.setItem(`quizProfile_${currentUser}`, JSON.stringify(quizProfile[currentUser]));
-    if (window.firebaseAPI) window.firebaseAPI.saveData(`quizProfile_${currentUser}`, quizProfile[currentUser]);
-    document.getElementById('profileQuizModal')?.remove();
-    renderQuizPage();
-}
-
-function openOtherProfileView(user) {
-    const profile = quizProfile[user];
-    const name = user === 'emir' ? 'Emir' : 'Pelin';
-    const entries = Object.entries(profile);
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width:420px;">
-            <div class="modal-header">
-                <h3>👤 ${name}'in Profili</h3>
-                <button class="close-btn" onclick="this.closest('.modal').remove()">&times;</button>
-            </div>
-            <div class="modal-body" style="max-height:60vh;overflow-y:auto;">
-                ${entries.length === 0 ? '<p style="color:var(--text-secondary);">Henüz profil doldurulmamış.</p>' :
-                    entries.map(([key, val]) => {
-                        const q = key.replace(/_/g,' ');
-                        return `<div class="profile-view-item"><span class="profile-view-q">${q}</span><span class="profile-view-a">${escapeHtml(val)}</span></div>`;
-                    }).join('')}
-            </div>
-        </div>`;
-    document.body.appendChild(modal);
-}
-
-function showAddQuizModal() {
-    const other = currentUser === 'emir' ? 'pelin' : 'emir';
-    const otherName = currentUser === 'emir' ? 'Pelin' : 'Emir';
-    const otherProfile = quizProfile[other];
-    const profileEntries = Object.entries(otherProfile);
-    const suggestions = profileEntries.length > 0
-        ? `<div class="quiz-suggestions"><p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.5rem;">💡 ${otherName}'in profilinden:</p>
-           ${profileEntries.slice(0,4).map(([k,v]) => {
-               const q = k.replace(/_/g,' ');
-               return `<button class="quiz-suggest-btn" onclick="fillQuizFromProfile('${escapeHtml(q)}','${escapeHtml(v)}')">${q}?</button>`;
-           }).join('')}</div>` : '';
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.id = 'addQuizModal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>${otherName}'e Soru Sor</h3>
-                <button class="close-btn" onclick="document.getElementById('addQuizModal').remove()">&times;</button>
-            </div>
-            <div class="modal-body">
-                ${suggestions}
-                <input type="text" id="quizQuestionInput" placeholder="Soru..." maxlength="200">
-                <input type="text" id="quizAnswerInput" placeholder="Doğru cevap (sadece sen göreceksin)..." maxlength="100">
-            </div>
-            <div class="modal-footer">
-                <button class="cancel-btn" onclick="document.getElementById('addQuizModal').remove()">İptal</button>
-                <button class="save-btn" onclick="saveQuizQuestion()">Sor</button>
-            </div>
-        </div>`;
-    document.body.appendChild(modal);
-    setTimeout(() => document.getElementById('quizQuestionInput')?.focus(), 100);
-}
-
-function fillQuizFromProfile(question, answer) {
-    const qInput = document.getElementById('quizQuestionInput');
-    const aInput = document.getElementById('quizAnswerInput');
-    if (qInput) qInput.value = question + '?';
-    if (aInput) aInput.value = answer;
-}
-
-function saveQuizQuestion() {
-    const question = document.getElementById('quizQuestionInput')?.value.trim();
-    const answer = document.getElementById('quizAnswerInput')?.value.trim();
-    if (!question || !answer) return;
-    quizData.questions.unshift({ id: Date.now(), question, answer, askedBy: currentUser, userAnswer: null, correct: null, createdAt: new Date().toISOString() });
-    saveQuizData();
-    document.getElementById('addQuizModal')?.remove();
-    renderQuizPage();
-}
-
-function submitQuizAnswer(questionId) {
-    const input = document.getElementById(`ans_${questionId}`);
-    const userAnswer = input?.value.trim();
-    if (!userAnswer) return;
-    const q = quizData.questions.find(q => q.id === questionId);
-    if (!q) return;
-    q.userAnswer = userAnswer;
-    q.correct = userAnswer.toLowerCase().trim() === q.answer.toLowerCase().trim();
-    q.answeredAt = new Date().toISOString();
-    saveQuizData();
-    renderQuizPage();
-}
-
-function deleteQuizQuestion(id) {
-    quizData.questions = quizData.questions.filter(q => q.id !== id);
-    saveQuizData();
-    renderQuizPage();
-}
-
-function saveQuizData() {
-    localStorage.setItem('quizQuestions', JSON.stringify(quizData.questions));
-    if (window.firebaseAPI) window.firebaseAPI.saveData('quizQuestions', quizData.questions);
-}
 // ===== HEDEF SİSTEMİ =====
 
 function openHedefSection() {
