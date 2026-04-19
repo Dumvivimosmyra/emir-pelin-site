@@ -225,11 +225,18 @@ function startRealtimeListeners() {
     });
 
     firebaseAPI.listenToData('theme', (data) => {
-        if (data) {
-            document.documentElement.setAttribute('data-theme', data);
-            localStorage.setItem('theme', data);
-            if (typeof setTheme === 'function') setTheme(data);
-        }
+        // Eski genel tema - artık kullanılmıyor, kişiye özel
+    });
+
+    // Kişiye özel tema listener'ları
+    ['emir', 'pelin'].forEach(user => {
+        firebaseAPI.listenToData(`theme_${user}`, (data) => {
+            if (data && currentUser === user) {
+                document.documentElement.setAttribute('data-theme', data);
+                localStorage.setItem(`theme_${user}`, data);
+                if (typeof setTheme === 'function') setTheme(data);
+            }
+        });
     });
 
     firebaseAPI.listenToData('emotionEntries', (data) => {
@@ -270,6 +277,15 @@ function startRealtimeListeners() {
             localStorage.setItem('quizQuestions', JSON.stringify(quizData.questions));
             if (typeof renderQuizPage === 'function') renderQuizPage();
         }
+    });
+
+    ['emir', 'pelin'].forEach(user => {
+        firebaseAPI.listenToData('quizProfile_' + user, (data) => {
+            if (data && typeof quizProfile !== 'undefined') {
+                quizProfile[user] = data;
+                localStorage.setItem('quizProfile_' + user, JSON.stringify(data));
+            }
+        });
     });
 
     firebaseAPI.listenToData('kesfeHistory', (data) => {

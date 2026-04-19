@@ -96,8 +96,10 @@ body {
     justify-content: center;
     background: var(--login-bg);
     padding: 1rem;
-    position: relative;
+    position: fixed;
+    inset: 0;
     overflow: hidden;
+}
 }
 
 .login-container {
@@ -5042,4 +5044,35 @@ body:has(.mini-player:not(.hidden)) .app-content {
         width: calc(100vw - 2rem);
         right: 1rem;
     }
+}
+
+/* Quiz profil bar */
+.quiz-profile-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.quiz-profile-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.quiz-profile-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
 }
