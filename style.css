@@ -3957,7 +3957,7 @@ body.rain-mode .cosmos-star {
     position: fixed;
     bottom: 65px;
     left: 0;
-    right: 0;
+    right: 90px; /* Tarçın için sağda boşluk */
     background: var(--bg-secondary);
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
@@ -4013,9 +4013,9 @@ body.rain-mode .cosmos-star {
     background: var(--border-color);
 }
 
-/* Mini player varken content padding artır */
-body:has(.mini-player:not(.hidden)) .app-content {
-    padding-bottom: 120px;
+/* Mini player varken Tarçın yukarı çık */
+body:has(.mini-player:not(.hidden)) #tarcinWidget {
+    bottom: 130px;
 }
 
 /* ===== QUIZ SİSTEMİ ===== */
@@ -4873,6 +4873,12 @@ body:has(.mini-player:not(.hidden)) .app-content {
     flex-direction: column;
     align-items: flex-end;
     gap: 0.5rem;
+    transition: bottom 0.3s ease;
+}
+
+/* Mini player varken Tarçın yukarı çık */
+body:has(.mini-player:not(.hidden)) #tarcinWidget {
+    bottom: 130px;
 }
 
 .tarcin-bubble {
@@ -4898,30 +4904,34 @@ body:has(.mini-player:not(.hidden)) .app-content {
     cursor: pointer;
     padding: 0;
     transition: transform 0.2s;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.25));
 }
 
 .tarcin-btn:hover {
-    transform: scale(1.08) translateY(-2px);
+    transform: scale(1.1) translateY(-3px);
+}
+
+.tarcin-btn:active {
+    transform: scale(0.95);
 }
 
 .tarcin-cat-display {
-    width: 72px;
-    height: 80px;
+    width: 80px;
+    height: 88px;
     overflow: hidden;
     display: block;
 }
 
 .tarcin-cat-svg {
-    width: 72px;
-    height: 80px;
+    width: 80px;
+    height: 88px;
     display: block;
 }
 
 /* Sohbet penceresi */
 .tarcin-chat {
     position: fixed;
-    bottom: 170px;
+    bottom: 178px;
     right: 1rem;
     width: 300px;
     max-height: 420px;
@@ -4984,6 +4994,12 @@ body:has(.mini-player:not(.hidden)) .app-content {
     font-size: 0.85rem;
     line-height: 1.4;
     word-wrap: break-word;
+    animation: msgFadeIn 0.2s ease;
+}
+
+@keyframes msgFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .tarcin-msg-ai {
@@ -5000,9 +5016,19 @@ body:has(.mini-player:not(.hidden)) .app-content {
     border-bottom-right-radius: 4px;
 }
 
-.tarcin-typing {
-    opacity: 0.6;
-    font-style: italic;
+/* Yazıyor animasyonu */
+.tarcin-dots span {
+    display: inline-block;
+    animation: dotBounce 1.2s infinite;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+.tarcin-dots span:nth-child(2) { animation-delay: 0.2s; }
+.tarcin-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dotBounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40%            { transform: translateY(-4px); opacity: 1; }
 }
 
 .tarcin-input-area {
@@ -5036,6 +5062,11 @@ body:has(.mini-player:not(.hidden)) .app-content {
     padding: 0.5rem 0.75rem;
     cursor: pointer;
     font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.tarcin-input-area button:hover {
+    background: #C96A30;
 }
 
 @media (max-width: 480px) {
