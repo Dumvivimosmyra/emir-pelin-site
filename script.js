@@ -667,7 +667,7 @@ function openPhotoUpload() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp';
-    input.setAttribute('capture', 'environment'); // Android için kamera desteği
+    // Profil fotoğrafı için capture kaldırıldı - sadece galeriden seçim
     
     input.onchange = function(e) {
         const file = e.target.files[0];
@@ -1666,10 +1666,16 @@ function addMemory() {
                 <input type="text" id="memoryTitle" placeholder="Anı başlığı...">
                 <textarea id="memoryDescription" placeholder="Bu anıyı anlat..."></textarea>
                 <div class="photo-upload-area">
-                    <button type="button" class="add-btn" id="memoryPhotoBtn" style="display:block;text-align:center;cursor:pointer;width:100%;border:none;">
-                        📷 Fotoğraf Seç
-                    </button>
-                    <input type="file" id="memoryPhoto" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" capture="environment" style="display:none;">
+                    <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
+                        <button type="button" class="add-btn" id="memoryPhotoGalleryBtn" style="flex:1;text-align:center;cursor:pointer;border:none;">
+                            🖼️ Galeriden Seç
+                        </button>
+                        <button type="button" class="add-btn" id="memoryPhotoCameraBtn" style="flex:1;text-align:center;cursor:pointer;border:none;">
+                            📷 Fotoğraf Çek
+                        </button>
+                    </div>
+                    <input type="file" id="memoryPhotoGallery" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" style="display:none;">
+                    <input type="file" id="memoryPhotoCamera" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" capture="environment" style="display:none;">
                     <div id="photoPreview" style="margin-top: 1rem;"></div>
                 </div>
             </div>
@@ -1681,56 +1687,77 @@ function addMemory() {
     `;
     document.body.appendChild(modal);
     
-    // Handle photo button click - trigger file input
-    const photoBtn = document.getElementById('memoryPhotoBtn');
-    const memoryPhotoInput = document.getElementById('memoryPhoto');
+    // Handle photo button clicks - trigger file inputs
+    const galleryBtn = document.getElementById('memoryPhotoGalleryBtn');
+    const cameraBtn = document.getElementById('memoryPhotoCameraBtn');
+    const galleryInput = document.getElementById('memoryPhotoGallery');
+    const cameraInput = document.getElementById('memoryPhotoCamera');
     
-    if (photoBtn && memoryPhotoInput) {
-        photoBtn.addEventListener('click', function(e) {
+    // Galeriden seç
+    if (galleryBtn && galleryInput) {
+        galleryBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            memoryPhotoInput.click();
+            galleryInput.click();
         });
         
-        // Handle photo selection
-        memoryPhotoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) {
-                console.log('Dosya seçilmedi');
-                return;
-            }
-            
-            console.log('Dosya seçildi:', file.name, file.type, file.size);
-            
-            // Check file size (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Fotoğraf boyutu çok büyük! Maksimum 5MB olmalı.');
-                return;
-            }
-            
-            // Check file type
-            if (!file.type.startsWith('image/')) {
-                alert('Lütfen sadece resim dosyası seçin!');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('photoPreview');
-                if (preview) {
-                    preview.innerHTML = `
-                        <img src="${e.target.result}" alt="Önizleme" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
-                        <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Fotoğraf seçildi ✓</p>
-                    `;
-                }
-            };
-            reader.onerror = function(error) {
-                console.error('Dosya okuma hatası:', error);
-                alert('Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
-            };
-            reader.readAsDataURL(file);
+        galleryInput.addEventListener('change', function(e) {
+            handleMemoryPhotoSelection(e.target.files[0]);
         });
     }
+    
+    // Fotoğraf çek
+    if (cameraBtn && cameraInput) {
+        cameraBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            cameraInput.click();
+        });
+        
+        cameraInput.addEventListener('change', function(e) {
+            handleMemoryPhotoSelection(e.target.files[0]);
+        });
+    }
+}
+
+// Anı fotoğraf seçimi için ortak fonksiyon
+function handleMemoryPhotoSelection(file) {
+    if (!file) {
+        console.log('Dosya seçilmedi');
+        return;
+    }
+    
+    console.log('Dosya seçildi:', file.name, file.type, file.size);
+    
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Fotoğraf boyutu çok büyük! Maksimum 5MB olmalı.');
+        return;
+    }
+    
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+        alert('Lütfen sadece resim dosyası seçin!');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('photoPreview');
+        if (preview) {
+            preview.innerHTML = `
+                <img src="${e.target.result}" alt="Önizleme" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
+                <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Fotoğraf seçildi ✓</p>
+            `;
+        }
+        // Seçilen fotoğrafı geçici olarak sakla
+        window._selectedMemoryPhoto = e.target.result;
+    };
+    reader.onerror = function(error) {
+        console.error('Dosya okuma hatası:', error);
+        alert('Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
+    };
+    reader.readAsDataURL(file);
 }
 
 function closeMemoryModal() {
@@ -1743,24 +1770,42 @@ function closeMemoryModal() {
 function saveMemoryFromModal() {
     const title = document.getElementById('memoryTitle').value.trim();
     const description = document.getElementById('memoryDescription').value.trim();
-    const photoInput = document.getElementById('memoryPhoto');
+    const galleryInput = document.getElementById('memoryPhotoGallery');
+    const cameraInput = document.getElementById('memoryPhotoCamera');
     
     if (!title) {
         alert('Lütfen anı başlığı girin!');
         return;
     }
     
-    if (photoInput.files[0]) {
+    // Önce geçici saklanan fotoğrafı kontrol et
+    if (window._selectedMemoryPhoto) {
+        resizeAndCropImage(window._selectedMemoryPhoto, (croppedImage) => {
+            saveMemory(title, description, croppedImage);
+            closeMemoryModal();
+            delete window._selectedMemoryPhoto;
+            alert('Anı başarıyla eklendi! 📸');
+        });
+    } else if (galleryInput.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            // Resize and crop image for memory
             resizeAndCropImage(e.target.result, (croppedImage) => {
                 saveMemory(title, description, croppedImage);
                 closeMemoryModal();
                 alert('Anı başarıyla eklendi! 📸');
             });
         };
-        reader.readAsDataURL(photoInput.files[0]);
+        reader.readAsDataURL(galleryInput.files[0]);
+    } else if (cameraInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            resizeAndCropImage(e.target.result, (croppedImage) => {
+                saveMemory(title, description, croppedImage);
+                closeMemoryModal();
+                alert('Anı başarıyla eklendi! 📸');
+            });
+        };
+        reader.readAsDataURL(cameraInput.files[0]);
     } else {
         // Save without photo
         saveMemory(title, description, null);
@@ -1876,10 +1921,16 @@ function editMemory(id) {
                 <input type="text" id="editMemoryTitle" placeholder="Anı başlığı..." value="${memory.title}">
                 <textarea id="editMemoryDescription" placeholder="Bu anıyı anlat...">${memory.description}</textarea>
                 <div class="photo-upload-area">
-                    <button type="button" class="add-btn" id="editMemoryPhotoBtn" style="display:block;text-align:center;cursor:pointer;width:100%;border:none;">
-                        📷 Fotoğraf Değiştir
-                    </button>
-                    <input type="file" id="editMemoryPhoto" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" capture="environment" style="display:none;">
+                    <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
+                        <button type="button" class="add-btn" id="editMemoryPhotoGalleryBtn" style="flex:1;text-align:center;cursor:pointer;border:none;">
+                            🖼️ Galeriden Seç
+                        </button>
+                        <button type="button" class="add-btn" id="editMemoryPhotoCameraBtn" style="flex:1;text-align:center;cursor:pointer;border:none;">
+                            📷 Fotoğraf Çek
+                        </button>
+                    </div>
+                    <input type="file" id="editMemoryPhotoGallery" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" style="display:none;">
+                    <input type="file" id="editMemoryPhotoCamera" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" capture="environment" style="display:none;">
                     <div id="editPhotoPreview" style="margin-top: 1rem;">
                         ${memory.photo ? `<img src="${memory.photo}" alt="Mevcut fotoğraf" style="max-width: 100%; max-height: 200px; border-radius: 8px;">` : ''}
                     </div>
@@ -1893,54 +1944,75 @@ function editMemory(id) {
     `;
     document.body.appendChild(modal);
     
-    // Handle photo button click - trigger file input
-    const photoBtn = document.getElementById('editMemoryPhotoBtn');
-    const editMemoryPhotoInput = document.getElementById('editMemoryPhoto');
+    // Handle photo button clicks - trigger file inputs
+    const galleryBtn = document.getElementById('editMemoryPhotoGalleryBtn');
+    const cameraBtn = document.getElementById('editMemoryPhotoCameraBtn');
+    const galleryInput = document.getElementById('editMemoryPhotoGallery');
+    const cameraInput = document.getElementById('editMemoryPhotoCamera');
     
-    if (photoBtn && editMemoryPhotoInput) {
-        photoBtn.addEventListener('click', function(e) {
+    // Galeriden seç
+    if (galleryBtn && galleryInput) {
+        galleryBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            editMemoryPhotoInput.click();
+            galleryInput.click();
         });
         
-        // Handle photo selection
-        editMemoryPhotoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) {
-                console.log('Dosya seçilmedi');
-                return;
-            }
-            
-            console.log('Dosya seçildi:', file.name, file.type, file.size);
-            
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Fotoğraf boyutu çok büyük! Maksimum 5MB olmalı.');
-                return;
-            }
-            
-            if (!file.type.startsWith('image/')) {
-                alert('Lütfen sadece resim dosyası seçin!');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('editPhotoPreview');
-                if (preview) {
-                    preview.innerHTML = `
-                        <img src="${e.target.result}" alt="Yeni fotoğraf" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
-                        <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Yeni fotoğraf seçildi ✓</p>
-                    `;
-                }
-            };
-            reader.onerror = function(error) {
-                console.error('Dosya okuma hatası:', error);
-                alert('Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
-            };
-            reader.readAsDataURL(file);
+        galleryInput.addEventListener('change', function(e) {
+            handleEditMemoryPhotoSelection(e.target.files[0]);
         });
     }
+    
+    // Fotoğraf çek
+    if (cameraBtn && cameraInput) {
+        cameraBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            cameraInput.click();
+        });
+        
+        cameraInput.addEventListener('change', function(e) {
+            handleEditMemoryPhotoSelection(e.target.files[0]);
+        });
+    }
+}
+
+// Anı düzenleme fotoğraf seçimi için ortak fonksiyon
+function handleEditMemoryPhotoSelection(file) {
+    if (!file) {
+        console.log('Dosya seçilmedi');
+        return;
+    }
+    
+    console.log('Dosya seçildi:', file.name, file.type, file.size);
+    
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Fotoğraf boyutu çok büyük! Maksimum 5MB olmalı.');
+        return;
+    }
+    
+    if (!file.type.startsWith('image/')) {
+        alert('Lütfen sadece resim dosyası seçin!');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('editPhotoPreview');
+        if (preview) {
+            preview.innerHTML = `
+                <img src="${e.target.result}" alt="Yeni fotoğraf" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
+                <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Yeni fotoğraf seçildi ✓</p>
+            `;
+        }
+        // Seçilen fotoğrafı geçici olarak sakla
+        window._selectedEditMemoryPhoto = e.target.result;
+    };
+    reader.onerror = function(error) {
+        console.error('Dosya okuma hatası:', error);
+        alert('Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
+    };
+    reader.readAsDataURL(file);
 }
 
 function closeEditMemoryModal() {
@@ -1951,7 +2023,8 @@ function closeEditMemoryModal() {
 function saveEditedMemory(id) {
     const title = document.getElementById('editMemoryTitle').value.trim();
     const description = document.getElementById('editMemoryDescription').value.trim();
-    const photoInput = document.getElementById('editMemoryPhoto');
+    const galleryInput = document.getElementById('editMemoryPhotoGallery');
+    const cameraInput = document.getElementById('editMemoryPhotoCamera');
     
     if (!title) {
         alert('Lütfen anı başlığı girin!');
@@ -1961,7 +2034,24 @@ function saveEditedMemory(id) {
     const memory = surpriseData.memories.find(m => m.id === id);
     if (!memory) return;
     
-    if (photoInput.files[0]) {
+    // Önce geçici saklanan fotoğrafı kontrol et
+    if (window._selectedEditMemoryPhoto) {
+        resizeAndCropImage(window._selectedEditMemoryPhoto, (croppedImage) => {
+            memory.title = title;
+            memory.description = description;
+            memory.photo = croppedImage;
+            localStorage.setItem('surpriseData_memories', JSON.stringify(surpriseData.memories));
+            
+            if (window.firebaseAPI) {
+                window.firebaseAPI.saveData('memories', surpriseData.memories);
+            }
+            
+            loadMemories();
+            closeEditMemoryModal();
+            delete window._selectedEditMemoryPhoto;
+            alert('Anı başarıyla güncellendi! 📸');
+        });
+    } else if (galleryInput.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
             resizeAndCropImage(e.target.result, (croppedImage) => {
@@ -1970,7 +2060,6 @@ function saveEditedMemory(id) {
                 memory.photo = croppedImage;
                 localStorage.setItem('surpriseData_memories', JSON.stringify(surpriseData.memories));
                 
-                // Firebase'e kaydet
                 if (window.firebaseAPI) {
                     window.firebaseAPI.saveData('memories', surpriseData.memories);
                 }
@@ -1980,7 +2069,26 @@ function saveEditedMemory(id) {
                 alert('Anı başarıyla güncellendi! 📸');
             });
         };
-        reader.readAsDataURL(photoInput.files[0]);
+        reader.readAsDataURL(galleryInput.files[0]);
+    } else if (cameraInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            resizeAndCropImage(e.target.result, (croppedImage) => {
+                memory.title = title;
+                memory.description = description;
+                memory.photo = croppedImage;
+                localStorage.setItem('surpriseData_memories', JSON.stringify(surpriseData.memories));
+                
+                if (window.firebaseAPI) {
+                    window.firebaseAPI.saveData('memories', surpriseData.memories);
+                }
+                
+                loadMemories();
+                closeEditMemoryModal();
+                alert('Anı başarıyla güncellendi! 📸');
+            });
+        };
+        reader.readAsDataURL(cameraInput.files[0]);
     } else {
         memory.title = title;
         memory.description = description;
@@ -3012,8 +3120,12 @@ function openGoalMemoryAdd(goalId) {
                 <input type="text" id="goalMemoryTitle" placeholder="Anı başlığı..." value="${escapeHtml(goal.title)}">
                 <textarea id="goalMemoryDesc" placeholder="Bu hedefe nasıl ulaştınız?..." rows="3"></textarea>
                 <div class="photo-upload-area">
-                    <button type="button" class="add-btn" id="goalMemoryPhotoBtn" style="display:block;text-align:center;cursor:pointer;width:100%;border:none;">📷 Fotoğraf Ekle</button>
-                    <input type="file" id="goalMemoryPhoto" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" capture="environment" style="display:none;">
+                    <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
+                        <button type="button" class="add-btn" id="goalMemoryPhotoGalleryBtn" style="flex:1;text-align:center;cursor:pointer;border:none;">🖼️ Galeriden Seç</button>
+                        <button type="button" class="add-btn" id="goalMemoryPhotoCameraBtn" style="flex:1;text-align:center;cursor:pointer;border:none;">📷 Fotoğraf Çek</button>
+                    </div>
+                    <input type="file" id="goalMemoryPhotoGallery" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" style="display:none;">
+                    <input type="file" id="goalMemoryPhotoCamera" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" capture="environment" style="display:none;">
                     <div id="goalMemoryPreview" style="margin-top:0.5rem;"></div>
                 </div>
             </div>
@@ -3025,41 +3137,54 @@ function openGoalMemoryAdd(goalId) {
     `;
     document.body.appendChild(modal);
 
-    const photoBtn = document.getElementById('goalMemoryPhotoBtn');
-    const photoInput = document.getElementById('goalMemoryPhoto');
+    const galleryBtn = document.getElementById('goalMemoryPhotoGalleryBtn');
+    const cameraBtn = document.getElementById('goalMemoryPhotoCameraBtn');
+    const galleryInput = document.getElementById('goalMemoryPhotoGallery');
+    const cameraInput = document.getElementById('goalMemoryPhotoCamera');
     
-    if (photoBtn && photoInput) {
-        photoBtn.addEventListener('click', function(e) {
+    const handlePhotoSelection = (file) => {
+        if (!file) {
+            console.log('Dosya seçilmedi');
+            return;
+        }
+        console.log('Dosya seçildi:', file.name, file.type, file.size);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const preview = document.getElementById('goalMemoryPreview');
+            if (preview) preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;">`;
+            window._selectedGoalMemoryPhoto = e.target.result;
+        };
+        reader.onerror = function(error) {
+            console.error('Dosya okuma hatası:', error);
+            alert('Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
+        };
+        reader.readAsDataURL(file);
+    };
+    
+    if (galleryBtn && galleryInput) {
+        galleryBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            photoInput.click();
+            galleryInput.click();
         });
-        
-        photoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) {
-                console.log('Dosya seçilmedi');
-                return;
-            }
-            console.log('Dosya seçildi:', file.name, file.type, file.size);
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const preview = document.getElementById('goalMemoryPreview');
-                if (preview) preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;">`;
-            };
-            reader.onerror = function(error) {
-                console.error('Dosya okuma hatası:', error);
-                alert('Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
-            };
-            reader.readAsDataURL(file);
+        galleryInput.addEventListener('change', (e) => handlePhotoSelection(e.target.files[0]));
+    }
+    
+    if (cameraBtn && cameraInput) {
+        cameraBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            cameraInput.click();
         });
+        cameraInput.addEventListener('change', (e) => handlePhotoSelection(e.target.files[0]));
     }
 }
 
 function saveGoalMemory(goalId) {
     const title = document.getElementById('goalMemoryTitle')?.value.trim();
     const desc = document.getElementById('goalMemoryDesc')?.value.trim() || '';
-    const photoInput = document.getElementById('goalMemoryPhoto');
+    const galleryInput = document.getElementById('goalMemoryPhotoGallery');
+    const cameraInput = document.getElementById('goalMemoryPhotoCamera');
 
     if (!title) return;
 
@@ -3084,13 +3209,21 @@ function saveGoalMemory(goalId) {
 
         // Tüm açık modalları kapat
         document.querySelectorAll('.modal').forEach(m => m.remove());
+        delete window._selectedGoalMemoryPhoto;
         renderGoalList();
     };
 
-    if (photoInput?.files[0]) {
+    // Önce geçici saklanan fotoğrafı kontrol et
+    if (window._selectedGoalMemoryPhoto) {
+        resizeAndCropImage(window._selectedGoalMemoryPhoto, doSave);
+    } else if (galleryInput?.files[0]) {
         const reader = new FileReader();
         reader.onload = (e) => resizeAndCropImage(e.target.result, doSave);
-        reader.readAsDataURL(photoInput.files[0]);
+        reader.readAsDataURL(galleryInput.files[0]);
+    } else if (cameraInput?.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => resizeAndCropImage(e.target.result, doSave);
+        reader.readAsDataURL(cameraInput.files[0]);
     } else {
         doSave(null);
     }
