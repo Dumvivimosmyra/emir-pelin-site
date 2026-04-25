@@ -1,24 +1,24 @@
-# Genel dosyalar
-.DS_Store
-Thumbs.db
+# API Keys ve hassas bilgiler
+config.js
+secrets.js
+.env
+.env.local
 
-# IDE dosyaları
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# IDE
 .vscode/
 .idea/
 
-# Geçici dosyalar
-*.tmp
-*.temp
+# OS
+.DS_Store
+Thumbs.db
 
-# Log dosyaları
+# Logs
 *.log
-
-# Firebase agent skills (gereksiz)
-.agents/
-.claude/
-.kiro/
-skills-lock.json
-functions/node_modules/
-
-# Firebase Functions (deploy edilmedi, Blaze planı gerekiyor)
-functions/
+npm-debug.log*
