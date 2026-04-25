@@ -276,6 +276,14 @@ function showAddQuizModal() {
             </div>
             <div class="modal-body">
                 ${suggestions}
+                <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">
+                    <button class="add-btn" onclick="generateAIQuizQuestion()" style="flex:1;font-size:0.85rem;">
+                        ✨ AI Soru Üret
+                    </button>
+                    <button class="add-btn" onclick="generateAIQuizQuestionFromProfile()" style="flex:1;font-size:0.85rem;" ${profileEntries.length === 0 ? 'disabled' : ''}>
+                        🎯 Profilden Üret
+                    </button>
+                </div>
                 <input type="text" id="quizQuestionInput" placeholder="Soru..." maxlength="200">
                 <input type="text" id="quizAnswerInput" placeholder="Doğru cevap (sadece sen göreceksin)..." maxlength="100">
             </div>
@@ -333,4 +341,186 @@ function deleteQuizQuestion(id) {
 function saveQuizData() {
     localStorage.setItem('quizQuestions', JSON.stringify(quizData.questions));
     if (window.firebaseAPI) window.firebaseAPI.saveData('quizQuestions', quizData.questions);
+}
+
+// ===== AI SORU ÜRETME =====
+
+async function generateAIQuizQuestion() {
+    const other = currentUser === 'emir' ? 'pelin' : 'emir';
+    const otherName = currentUser === 'emir' ? 'Pelin' : 'Emir';
+    const myName = currentUser === 'emir' ? 'Emir' : 'Pelin';
+    
+    const questionInput = document.getElementById('quizQuestionInput');
+    const answerInput = document.getElementById('quizAnswerInput');
+    
+    if (!questionInput || !answerInput) return;
+    
+    // API key kontrolü
+    if (!GROQ_API_KEY || GROQ_API_KEY === 'YOUR_API_KEY_HERE') {
+        alert('AI özelliği için API key gerekli. Lütfen manuel soru girin.');
+        return;
+    }
+    
+    // Loading göster
+    questionInput.value = 'AI soru üretiyor...';
+    questionInput.disabled = true;
+    answerInput.disabled = true;
+    
+    const categories = Object.keys(QUIZ_CATEGORIES).map(k => QUIZ_CATEGORIES[k].label).join(', ');
+    
+    const prompt = `Sen bir quiz soru üreticisisin. ${myName}, ${otherName}'e sormak için bir soru üretmelisin.
+
+Kategoriler: ${categories}
+
+Kurallar:
+- Kısa ve net bir soru sor (max 15 kelime)
+- Kişisel ve ilginç olsun
+- Cevabı tahmin edilebilir olmalı
+- Türkçe yaz
+- Sadece soruyu yaz, açıklama yapma
+
+Format:
+Soru: [soru metni]
+
+Örnek:
+Soru: En sevdiğin mevsim hangisi?`;
+
+    try {
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: GROQ_MODEL,
+                messages: [{ role: 'user', content: prompt }],
+                max_tokens: 100,
+                temperature: 0.8
+            })
+        });
+        
+        if (!res.ok) {
+            throw new Error(`API Hatası: ${res.status} - ${res.statusText}`);
+        }
+        
+        const data = await res.json();
+        const reply = data.choices?.[0]?.message?.content || '';
+        
+        // "Soru:" kısmını temizle
+        const question = reply.replace(/^Soru:\s*/i, '').trim();
+        
+        questionInput.value = question;
+        answerInput.value = '';
+        answerInput.focus();
+        
+    } catch (error) {
+        console.error('AI soru üretme hatası:', error);
+        questionInput.value = '';
+        alert('AI soru üretemedi (API key süresi dolmuş olabilir). Lütfen manuel soru girin.');
+    } finally {
+        questionInput.disabled = false;
+        answerInput.disabled = false;
+    }
+}
+
+async function generateAIQuizQuestionFromProfile() {
+    const other = currentUser === 'emir' ? 'pelin' : 'emir';
+    const otherName = currentUser === 'emir' ? 'Pelin' : 'Emir';
+    const myName = currentUser === 'emir' ? 'Emir' : 'Pelin';
+    const otherProfile = quizProfile[other];
+    
+    const questionInput = document.getElementById('quizQuestionInput');
+    const answerInput = document.getElementById('quizAnswerInput');
+    
+    if (!questionInput || !answerInput) return;
+    
+    const profileEntries = Object.entries(otherProfile);
+    if (profileEntries.length === 0) {
+        alert(`${otherName} henüz profil doldurmamış.`);
+        return;
+    }
+    
+    // API key kontrolü
+    if (!GROQ_API_KEY || GROQ_API_KEY === 'YOUR_API_KEY_HERE') {
+        alert('AI özelliği için API key gerekli. Lütfen manuel soru girin.');
+        return;
+    }
+    
+    // Loading göster
+    questionInput.value = 'AI soru üretiyor...';
+    questionInput.disabled = true;
+    answerInput.disabled = true;
+    
+    // Profil verilerini hazırla
+    const profileData = profileEntries.map(([k, v]) => {
+        const q = k.replace(/_/g, ' ').replace(/^[a-z]+ /, '');
+        return `${q}: ${v}`;
+    }).join('\n');
+    
+    const prompt = `Sen bir quiz soru üreticisisin. ${myName}, ${otherName}'in profilini biliyor ve ona soru soracak.
+
+${otherName}'in profili:
+${profileData}
+
+Kurallar:
+- Profildeki bilgilerden BİRİNİ seç
+- O bilgiyle ilgili yaratıcı bir soru sor
+- Cevap profilde olmalı
+- Kısa ve net sor (max 15 kelime)
+- Türkçe yaz
+- Sadece soruyu ve cevabı yaz
+
+Format:
+Soru: [soru metni]
+Cevap: [cevap metni]
+
+Örnek:
+Soru: En sevdiğin renk nedir?
+Cevap: Mavi`;
+
+    try {
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${GROQ_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: GROQ_MODEL,
+                messages: [{ role: 'user', content: prompt }],
+                max_tokens: 150,
+                temperature: 0.7
+            })
+        });
+        
+        if (!res.ok) {
+            throw new Error(`API Hatası: ${res.status} - ${res.statusText}`);
+        }
+        
+        const data = await res.json();
+        const reply = data.choices?.[0]?.message?.content || '';
+        
+        // Parse et
+        const questionMatch = reply.match(/Soru:\s*(.+)/i);
+        const answerMatch = reply.match(/Cevap:\s*(.+)/i);
+        
+        if (questionMatch && answerMatch) {
+            questionInput.value = questionMatch[1].trim();
+            answerInput.value = answerMatch[1].trim();
+        } else {
+            questionInput.value = reply.split('\n')[0].replace(/^Soru:\s*/i, '').trim();
+            answerInput.value = '';
+        }
+        
+        answerInput.focus();
+        
+    } catch (error) {
+        console.error('AI soru üretme hatası:', error);
+        questionInput.value = '';
+        alert('AI soru üretemedi (API key süresi dolmuş olabilir). Lütfen manuel soru girin.');
+    } finally {
+        questionInput.disabled = false;
+        answerInput.disabled = false;
+    }
 }

@@ -99,6 +99,16 @@ body {
     position: fixed;
     inset: 0;
     overflow: hidden;
+    z-index: 10000; /* Login ekranı en üstte */
+}
+
+/* Login ekranı açıkken tema partikülleri gizle */
+body:has(.login-screen:not(.hidden)) .theme-particle,
+body:has(.login-screen:not(.hidden)) .cosmos-star,
+body:has(.login-screen:not(.hidden)) .forest-corner,
+body:has(.login-screen:not(.hidden)) .sakura-particle,
+body:has(.login-screen:not(.hidden)) .minimal-heart {
+    display: none !important;
 }
 
 .login-container {

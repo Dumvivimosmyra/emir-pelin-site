@@ -1,7 +1,19 @@
 ﻿// Groq AI Entegrasyonu (Llama 3.1)
-const GROQ_API_KEY = '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';
+// API key'i localStorage'dan al (güvenlik için kodda saklanmıyor)
+const GROQ_API_KEY = localStorage.getItem('groq_api_key') || '';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.1-8b-instant';
+
+// İlk kurulum: API key yoksa kullanıcıdan al
+function checkGroqApiKey() {
+    if (!GROQ_API_KEY) {
+        const key = prompt('Groq API Key girin (AI özellikleri için gerekli):\n\nAPI key almak için: https://console.groq.com/keys');
+        if (key) {
+            localStorage.setItem('groq_api_key', key.trim());
+            location.reload();
+        }
+    }
+}
 
 async function groqRequest(prompt, systemPrompt = '') {
     try {

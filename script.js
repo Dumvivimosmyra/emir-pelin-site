@@ -43,20 +43,8 @@ function loadUserSettings() {
         Object.assign(userCredentials, JSON.parse(savedCredentials));
     }
     
-    // Load theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        setTimeout(() => {
-            startThemeAnimation(savedTheme);
-            startRainModeScheduler(savedTheme);
-        }, 500);
-    } else {
-        setTimeout(() => {
-            startThemeAnimation('sakura');
-            startRainModeScheduler('sakura');
-        }, 500);
-    }
+    // Login ekranı için varsayılan tema (sakura)
+    document.documentElement.setAttribute('data-theme', 'sakura');
 }
 
 // Save user settings
@@ -73,12 +61,15 @@ function toggleTheme() {
 
 function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    // Kişiye özel kaydet
-    const key = currentUser ? `theme_${currentUser}` : 'theme';
+    // Kişiye ve cihaza özel kaydet - her kullanıcı kendi cihazında kendi temasını seçer
+    const key = `theme_${currentUser}`;
     localStorage.setItem(key, theme);
+    
+    // Firebase'e de kaydet (diğer cihazlar için senkronizasyon)
     if (window.firebaseAPI && currentUser) {
-        window.firebaseAPI.saveData(`theme_${currentUser}`, theme);
+        window.firebaseAPI.saveData(key, theme);
     }
+    
     document.querySelectorAll('.theme-option').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === theme);
     });
@@ -394,6 +385,11 @@ function logout() {
     if (w) w.remove();
     if (typeof tarcinChatHistory !== 'undefined') tarcinChatHistory = [];
 
+    // Tema animasyonlarını durdur
+    if (window._themeAnimInterval) clearInterval(window._themeAnimInterval);
+    if (window._rainScheduler) clearInterval(window._rainScheduler);
+    document.querySelectorAll('.sakura-particle, .forest-corner, .cosmos-star, .theme-particle, .minimal-heart').forEach(el => el.remove());
+
     currentUser = null;
     selectedUser = null;
     localStorage.removeItem('currentUser');
@@ -410,12 +406,26 @@ function logout() {
     document.querySelectorAll('.user-option').forEach(option => {
         option.classList.remove('selected');
     });
+    
+    // Login ekranı için temayı sıfırla (varsayılan sakura)
+    document.documentElement.setAttribute('data-theme', 'sakura');
 }
 
 function showMainApp() {
     updateHeaderProfile();
     setupProfileSection();
     setupSurpriseSection();
+    
+    // Kullanıcının kendi temasını yükle (cihaza özel)
+    const userTheme = localStorage.getItem(`theme_${currentUser}`) || 'sakura';
+    document.documentElement.setAttribute('data-theme', userTheme);
+    
+    // Tema animasyonlarını başlat
+    setTimeout(() => {
+        startThemeAnimation(userTheme);
+        startRainModeScheduler(userTheme);
+    }, 500);
+    
     // Tarçın'ı başlat - sadece giriş yapıldıktan sonra
     setTimeout(() => {
         if (typeof initTarcin === 'function') initTarcin();
