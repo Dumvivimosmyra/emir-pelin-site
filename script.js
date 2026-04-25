@@ -666,10 +666,17 @@ function changeAvatar(avatar) {
 function openPhotoUpload() {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/*';
+    input.accept = 'image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp';
+    input.setAttribute('capture', 'environment'); // Android için kamera desteği
+    
     input.onchange = function(e) {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file) {
+            console.log('Dosya seçilmedi');
+            return;
+        }
+        
+        console.log('Profil fotoğrafı seçildi:', file.name, file.type, file.size);
         
         // Check file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
@@ -701,9 +708,20 @@ function openPhotoUpload() {
                 alert('Profil fotoğrafı başarıyla güncellendi! 📸');
             });
         };
+        reader.onerror = function(error) {
+            console.error('Dosya okuma hatası:', error);
+            alert('Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
+        };
         reader.readAsDataURL(file);
     };
-    input.click();
+    
+    // Android için ek kontrol
+    try {
+        input.click();
+    } catch (error) {
+        console.error('Dosya seçici açılamadı:', error);
+        alert('Dosya seçici açılamadı. Lütfen tarayıcı ayarlarınızı kontrol edin.');
+    }
 }
 
 function removePhoto() {
@@ -1648,10 +1666,10 @@ function addMemory() {
                 <input type="text" id="memoryTitle" placeholder="Anı başlığı...">
                 <textarea id="memoryDescription" placeholder="Bu anıyı anlat..."></textarea>
                 <div class="photo-upload-area">
-                    <input type="file" id="memoryPhoto" accept="image/*" style="display: none;">
-                    <button class="add-btn" onclick="document.getElementById('memoryPhoto').click()">
+                    <button type="button" class="add-btn" id="memoryPhotoBtn" style="display:block;text-align:center;cursor:pointer;width:100%;border:none;">
                         📷 Fotoğraf Seç
                     </button>
+                    <input type="file" id="memoryPhoto" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" capture="environment" style="display:none;">
                     <div id="photoPreview" style="margin-top: 1rem;"></div>
                 </div>
             </div>
@@ -1663,12 +1681,26 @@ function addMemory() {
     `;
     document.body.appendChild(modal);
     
-    // Handle photo selection
+    // Handle photo button click - trigger file input
+    const photoBtn = document.getElementById('memoryPhotoBtn');
     const memoryPhotoInput = document.getElementById('memoryPhoto');
-    if (memoryPhotoInput) {
+    
+    if (photoBtn && memoryPhotoInput) {
+        photoBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            memoryPhotoInput.click();
+        });
+        
+        // Handle photo selection
         memoryPhotoInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (!file) return;
+            if (!file) {
+                console.log('Dosya seçilmedi');
+                return;
+            }
+            
+            console.log('Dosya seçildi:', file.name, file.type, file.size);
             
             // Check file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
@@ -1691,6 +1723,10 @@ function addMemory() {
                         <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Fotoğraf seçildi ✓</p>
                     `;
                 }
+            };
+            reader.onerror = function(error) {
+                console.error('Dosya okuma hatası:', error);
+                alert('Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
             };
             reader.readAsDataURL(file);
         });
@@ -1840,10 +1876,10 @@ function editMemory(id) {
                 <input type="text" id="editMemoryTitle" placeholder="Anı başlığı..." value="${memory.title}">
                 <textarea id="editMemoryDescription" placeholder="Bu anıyı anlat...">${memory.description}</textarea>
                 <div class="photo-upload-area">
-                    <input type="file" id="editMemoryPhoto" accept="image/*" style="display: none;">
-                    <button class="add-btn" onclick="document.getElementById('editMemoryPhoto').click()">
+                    <button type="button" class="add-btn" id="editMemoryPhotoBtn" style="display:block;text-align:center;cursor:pointer;width:100%;border:none;">
                         📷 Fotoğraf Değiştir
                     </button>
+                    <input type="file" id="editMemoryPhoto" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" capture="environment" style="display:none;">
                     <div id="editPhotoPreview" style="margin-top: 1rem;">
                         ${memory.photo ? `<img src="${memory.photo}" alt="Mevcut fotoğraf" style="max-width: 100%; max-height: 200px; border-radius: 8px;">` : ''}
                     </div>
@@ -1857,12 +1893,26 @@ function editMemory(id) {
     `;
     document.body.appendChild(modal);
     
-    // Handle photo selection
+    // Handle photo button click - trigger file input
+    const photoBtn = document.getElementById('editMemoryPhotoBtn');
     const editMemoryPhotoInput = document.getElementById('editMemoryPhoto');
-    if (editMemoryPhotoInput) {
+    
+    if (photoBtn && editMemoryPhotoInput) {
+        photoBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            editMemoryPhotoInput.click();
+        });
+        
+        // Handle photo selection
         editMemoryPhotoInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (!file) return;
+            if (!file) {
+                console.log('Dosya seçilmedi');
+                return;
+            }
+            
+            console.log('Dosya seçildi:', file.name, file.type, file.size);
             
             if (file.size > 5 * 1024 * 1024) {
                 alert('Fotoğraf boyutu çok büyük! Maksimum 5MB olmalı.');
@@ -1883,6 +1933,10 @@ function editMemory(id) {
                         <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Yeni fotoğraf seçildi ✓</p>
                     `;
                 }
+            };
+            reader.onerror = function(error) {
+                console.error('Dosya okuma hatası:', error);
+                alert('Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
             };
             reader.readAsDataURL(file);
         });
@@ -2958,8 +3012,8 @@ function openGoalMemoryAdd(goalId) {
                 <input type="text" id="goalMemoryTitle" placeholder="Anı başlığı..." value="${escapeHtml(goal.title)}">
                 <textarea id="goalMemoryDesc" placeholder="Bu hedefe nasıl ulaştınız?..." rows="3"></textarea>
                 <div class="photo-upload-area">
-                    <input type="file" id="goalMemoryPhoto" accept="image/*" style="display:none;">
-                    <button class="add-btn" onclick="document.getElementById('goalMemoryPhoto').click()" style="width:100%">📷 Fotoğraf Ekle</button>
+                    <button type="button" class="add-btn" id="goalMemoryPhotoBtn" style="display:block;text-align:center;cursor:pointer;width:100%;border:none;">📷 Fotoğraf Ekle</button>
+                    <input type="file" id="goalMemoryPhoto" accept="image/*,image/jpeg,image/jpg,image/png,image/gif,image/webp" capture="environment" style="display:none;">
                     <div id="goalMemoryPreview" style="margin-top:0.5rem;"></div>
                 </div>
             </div>
@@ -2971,16 +3025,35 @@ function openGoalMemoryAdd(goalId) {
     `;
     document.body.appendChild(modal);
 
-    document.getElementById('goalMemoryPhoto')?.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const preview = document.getElementById('goalMemoryPreview');
-            if (preview) preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;">`;
-        };
-        reader.readAsDataURL(file);
-    });
+    const photoBtn = document.getElementById('goalMemoryPhotoBtn');
+    const photoInput = document.getElementById('goalMemoryPhoto');
+    
+    if (photoBtn && photoInput) {
+        photoBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            photoInput.click();
+        });
+        
+        photoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                console.log('Dosya seçilmedi');
+                return;
+            }
+            console.log('Dosya seçildi:', file.name, file.type, file.size);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('goalMemoryPreview');
+                if (preview) preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;">`;
+            };
+            reader.onerror = function(error) {
+                console.error('Dosya okuma hatası:', error);
+                alert('Fotoğraf yüklenirken bir hata oluştu. Lütfen tekrar deneyin.');
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 }
 
 function saveGoalMemory(goalId) {
