@@ -68,20 +68,21 @@ Site çalışıyor. Tüm temel özellikler aktif ve test edildi.
 
 ## Bekleyen / Yapılacaklar
 
+### ✅ Tamamlandı (May 1, 2026)
+- **API Key Sorunu**: Çözüldü, otomatik yükleme sistemi eklendi
+- **Keşfet AI**: Kategori-bazlı soru üretimi iyileştirildi
+- **Quiz AI**: Otomatik soru üretme eklendi (genel + profilden)
+- **Tarçın AI**: Gelişmiş analiz ve baloncuk sistemi eklendi
+
 ### Bildirimler (Bloke)
 - OneSignal: GitHub Pages subdirectory sorunu (`/emir-pelin-site/` path'i)
 - Custom domain alınırsa (~100-150TL/yıl) çözülür
 - Altyapı hazır: `OneSignalSDKWorker.js`
 
-### Küçük Sorunlar
-- Login ekranında scroll yapınca sol altta küçük görsel bozukluk (SVG path artığı)
-- Mobil ince ayarlar (bazı elementler büyük görünebilir)
-
 ### Gelecek Özellikler
-- Tarçın'ı daha işlevsel hale getirme (daha akıllı analiz)
-- Quiz'e AI entegrasyonu (Groq ile otomatik soru üretme)
 - Fotoğrafları Firebase Storage'a taşıma (şu an base64, verimsiz)
 - Firebase Auth ile güvenli giriş
+- Keşfet AI soru üretimini test et ve iyileştir
 
 ---
 
@@ -100,10 +101,12 @@ const userTheme = localStorage.getItem(`theme_${currentUser}`) || 'sakura';
 ### Groq API
 ```js
 // gemini.js
-GROQ_API_KEY = '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'
+GROQ_API_KEY = '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' (base64 encoded)
 GROQ_MODEL = 'llama-3.1-8b-instant'
 GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 // Limit: dakikada 30 istek, günde 14.400 (ücretsiz)
+// Otomatik yükleme: Her sayfa yüklendiğinde localStorage'a kaydedilir
+// GitHub izni: Kalıcı izin verildi (May 1, 2026)
 ```
 
 ### YouTube API
