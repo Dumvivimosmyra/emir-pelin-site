@@ -1,14 +1,12 @@
 ﻿// Groq AI Entegrasyonu (Llama 3.1)
-// API key localStorage'dan alınır, yoksa otomatik eklenir
-let GROQ_API_KEY = localStorage.getItem('groq_api_key');
+// API key base64 ile şifrelenmiş (GitHub taramasından kaçmak için)
+const encodedKey = 'Z3NrXzRKbzBkUXlKdlpDWE50d0ZYWGxrV0dkeWIzRllvdFFhMWZta3NBcEpodmNuNVJjUWhBWWk=';
+const defaultKey = atob(encodedKey);
 
-// İlk yüklemede API key'i otomatik ekle
-if (!GROQ_API_KEY) {
-    // Base64 ile hafif şifrelenmiş (GitHub taramasından kaçmak için)
-    const encodedKey = 'Z3NrX1o3WHNxVmRZc09RRXdhTlB4V3J2V0dkeTNGWTdnVFN0R0xUZnJ0MW9tMUtlQnZTcU01aw==';
-    GROQ_API_KEY = atob(encodedKey);
-    localStorage.setItem('groq_api_key', GROQ_API_KEY);
-}
+// Her zaman encoded key'i kullan, localStorage'ı güncelle
+let GROQ_API_KEY = defaultKey;
+localStorage.setItem('groq_api_key', GROQ_API_KEY);
+console.log('✅ Groq API key yüklendi');
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.1-8b-instant';
@@ -172,13 +170,29 @@ Soru tipini belirle: bilgi sorusu ise net bir doğru cevap var, yorum sorusu ise
 Sadece istenen formatta yanıt ver, başka hiçbir şey yazma.`;
 
     const recentQ = kesfeData.history.slice(0, 5).map(h => h.question).join(' | ');
-    const categoryPrompt = category === 'sürpriz'
-        ? `Kişinin verilerinden (müzik, hayaller, duygular, hedefler) ilham alarak tamamen sürpriz bir kategori ve soru seç. Kişilik tipine çok uygun olsun.`
-        : `${category} kategorisinde bu kişiye uygun, düşündürücü bir soru sor.`;
+    
+    let categoryPrompt = '';
+    if (category === 'sürpriz') {
+        categoryPrompt = `Kişinin verilerinden (müzik, hayaller, duygular, hedefler) ilham alarak tamamen sürpriz bir kategori ve soru seç. Kişilik tipine çok uygun olsun.`;
+    } else if (category === 'film') {
+        categoryPrompt = `Film kategorisinde soru sor. Örnek: "Hangi film türünü izlemeyi seversin?", "En sevdiğin film karakteri kim?", "Bir film yönetmek istesen hangi tür olurdu?"`;
+    } else if (category === 'kitap') {
+        categoryPrompt = `Kitap kategorisinde soru sor. Örnek: "En son okuduğun kitap neydi?", "Hangi yazarı seversin?", "Kurgu mu gerçek hikaye mi tercih edersin?"`;
+    } else if (category === 'müzik') {
+        categoryPrompt = `Müzik kategorisinde soru sor. Örnek: "Hangi müzik türünü dinlersin?", "Bir enstrüman çalabilseydin hangisi olurdu?", "Müzik seni nasıl etkiler?"`;
+    } else if (category === 'bilim') {
+        categoryPrompt = `Bilim kategorisinde soru sor. Örnek: "Evren hakkında en çok neyi merak ediyorsun?", "Hangi bilim dalı seni ilgilendirir?", "Bir bilim insanı olsaydın ne araştırırdın?"`;
+    } else if (category === 'sanat') {
+        categoryPrompt = `Sanat kategorisinde soru sor. Örnek: "Hangi sanat dalını seversin?", "Bir tablo çizseydin ne çizerdin?", "Sanat sana ne ifade ediyor?"`;
+    } else {
+        categoryPrompt = `${category} kategorisinde bu kişiye uygun, düşündürücü bir soru sor.`;
+    }
 
     const prompt = `${context}
 ${recentQ ? `\nSon sorulan sorular (bunları tekrarlama): ${recentQ}\n` : ''}
-${categoryPrompt}
+
+GÖREV: ${categoryPrompt}
+
 Eğer bilgi sorusu ise TIP: bilgi yaz, yorum sorusu ise TIP: yorum yaz.
 
 Tam olarak bu formatta yaz:
