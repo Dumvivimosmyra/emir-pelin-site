@@ -390,15 +390,41 @@ async function sendTarcinMessage() {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
             body: JSON.stringify({ model: GROQ_MODEL, messages, max_tokens: 200, temperature: 0.5 })
         });
+        
+        // Rate limit kontrolü
+        if (res.status === 429) {
+            typing.remove();
+            addTarcinMessage('tarcin', 'Çok fazla konuştuk, biraz dinlenmeliyim 😴 (1 dakika bekle)');
+            setTarcinState('sleep');
+            setTimeout(() => setTarcinState('awake'), 3000);
+            return;
+        }
+        
+        if (!res.ok) {
+            throw new Error(`API Hatası: ${res.status}`);
+        }
+        
         const data = await res.json();
         const reply = data.choices?.[0]?.message?.content || 'Mırr... bir sorun oldu 🐾';
         typing.remove();
         tarcinChatHistory.push({ role: 'assistant', content: reply });
         addTarcinMessage('tarcin', reply);
         setTarcinState('awake');
-    } catch {
+    } catch (error) {
+        console.error('Tarçın AI hatası:', error);
         typing.remove();
-        addTarcinMessage('tarcin', 'Bağlanamadım 🐾');
+        
+        // Hata tipine göre mesaj
+        let errorMsg = 'Bağlanamadım 🐾';
+        if (error.message.includes('429') || error.message.includes('Rate limit')) {
+            errorMsg = 'Çok fazla konuştuk, biraz dinlenmeliyim 😴';
+        } else if (error.message.includes('401')) {
+            errorMsg = 'API key sorunlu görünüyor 🔑';
+        } else if (error.message.includes('network')) {
+            errorMsg = 'İnternet bağlantısı yok gibi 🌐';
+        }
+        
+        addTarcinMessage('tarcin', errorMsg);
         setTarcinState('awake');
     }
 }
